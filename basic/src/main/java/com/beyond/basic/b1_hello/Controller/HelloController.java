@@ -2,10 +2,13 @@ package com.beyond.basic.b1_hello.Controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 // Component 어노테이션을 통해 별도의 객체를 생성할 필요가 없는, 싱글톤 객체 생성
 // Controller 어노테이션을 통해 쉽게 사용자의 http request를 분석하고, http response를 생성
@@ -132,13 +135,58 @@ public class HelloController {
         return "axios-file-view";
     }
 
-
-    // case3. text와 멀티 file이 있는 form-data 형식
+    // case3. text와 멀티 file이 있는 form-data 형식 (js로 제출)
+    @GetMapping("/axios-multi-file-view")
+    public String axiosMultiFileView() {
+        return "axios-multi-file-view";
+    }
+    @PostMapping("/axios-multi-file-view")
+    @ResponseBody
+    public String axiosMultiFileViewPost(@ModelAttribute Hello hello,
+                                   @RequestParam(value="photos") List<MultipartFile> photos) {
+        System.out.println(hello);
+        for(int i = 0 ; i < photos.size() ; i++) {
+            System.out.println(photos.get(i).getOriginalFilename());
+        }
+        return "ok";
+    }
 
     // case4. json 데이터 전송
+    @GetMapping("/axios-json-view")
+    public String axiosJsonView() {
+        return "axios-json-view";
+    }
+    @PostMapping("/axios-json-view")
+    @ResponseBody
+    // RequestBody : json 형식으로 데이터가 들어올 때 객체로 자동 파싱
+    public String axiosJsonViewPost(@RequestBody Hello hello) {
+        System.out.println(hello);
+        return "ok";
+    }
 
     // case5. 중첩된 json 데이터 처리
+    @GetMapping("/axios-nested-json-view")
+    public String axiosNestedJsonView() {
+        return "axios-nested-json-view";
+    }
+    @PostMapping("/axios-nested-json-view")
+    @ResponseBody
+    public String axiosNestedJsonViewPost(@RequestBody Student student) {
+        System.out.println(student);
+        return "ok";
+    }
 
-    // cas6. json(text) + file 같이 처리할 때
-
+    // cas6. json(text) + file 같이 처리할 때 : 텍스트 구조가 복합하여 피치못하게 json을 써야하는 경우
+    // 데이터 형식 : hello={name: "xx", email: "xxx"}&photo=text.jpg
+    // 결론은 단순 json 구조가 아닌, multipart-formdata 구조안에 json을 넣는 구조.
+    @GetMapping("/axios-json-file-view")
+    public String axiosJsonFileView() {
+        return "axios-json-file-view";
+    }
+    @PostMapping("/axios-json-file-view")
+    @ResponseBody
+    public String axiosJsonFileViewPost() {
+//        System.out.println(student);
+        return "ok";
+    }
 }
