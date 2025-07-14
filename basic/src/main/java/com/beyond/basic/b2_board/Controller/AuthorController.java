@@ -1,12 +1,12 @@
 package com.beyond.basic.b2_board.Controller;
 
 import com.beyond.basic.b2_board.Service.AuthorService;
-import com.beyond.basic.b2_board.domain.Author;
 import com.beyond.basic.b2_board.dto.AuthorCreateDto;
+import com.beyond.basic.b2_board.dto.AuthorDetailDto;
+import com.beyond.basic.b2_board.dto.AuthorListDto;
 import com.beyond.basic.b2_board.dto.AuthorUpdatePwDto;
 import com.sun.nio.sctp.IllegalReceiveException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,20 +31,20 @@ public class AuthorController {
 
     // 회원 목록 조회 (/list)
     @GetMapping("/list")
-    public List<Author> listAuthors() {
-        List<Author> authorList = this.authorService.findAll();
-        System.out.println(authorList);
-        return authorList;
+    public List<AuthorListDto> listAuthors() {
+        List<AuthorListDto> authorListDto = this.authorService.findAll();
+        System.out.println(authorListDto);
+        return authorListDto;
     }
 
     // 회원 상세 조회 : id로 조회 (/detail/1)
     // 서버에서 별도의 try catch를 하지 않으면, 에러 발생 시 500에러 + 스프링의 포맷으로 에러 리턴.
     @GetMapping("/detail/{inputId}")
-    public Author findById(@PathVariable Long inputId) {
-        Author author = null;
+    public AuthorDetailDto findById(@PathVariable Long inputId) {
+        AuthorDetailDto authorDetailDto = null;
         try {
-            author = this.authorService.findById(inputId);
-            return author;
+            authorDetailDto = this.authorService.findById(inputId);
+            return authorDetailDto;
         } catch(NoSuchElementException e) {
             e.printStackTrace();
         }

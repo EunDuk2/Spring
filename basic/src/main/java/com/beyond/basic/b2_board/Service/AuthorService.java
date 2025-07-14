@@ -3,10 +3,13 @@ package com.beyond.basic.b2_board.Service;
 import com.beyond.basic.b2_board.Repository.AuthorMemoryRepository;
 import com.beyond.basic.b2_board.domain.Author;
 import com.beyond.basic.b2_board.dto.AuthorCreateDto;
+import com.beyond.basic.b2_board.dto.AuthorDetailDto;
+import com.beyond.basic.b2_board.dto.AuthorListDto;
 import com.beyond.basic.b2_board.dto.AuthorUpdatePwDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -54,15 +57,23 @@ public class AuthorService {
         this.authorMemoryRepository.save(author);
     }
 
-    public List<Author> findAll() {
-        return this.authorMemoryRepository.findAll();
+    public List<AuthorListDto> findAll() {
+        List<AuthorListDto> authorListDto = new ArrayList<>();
+        List<Author> authorList = this.authorMemoryRepository.findAll();
+        for(Author a : authorList) {
+            authorListDto.add(new AuthorListDto(a.getId(), a.getName(), a.getEmail()));
+        }
+
+        return authorListDto;
     }
 
     // orElseThrow -> NoSuchElement
     // 회원 상세 조회
-    public Author findById(Long id) throws NoSuchElementException {
-        Optional<Author> optionalAuthor = this.authorMemoryRepository.findById(id);
-        return optionalAuthor.orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
+    public AuthorDetailDto findById(Long id) throws NoSuchElementException {
+        Author author = this.authorMemoryRepository.findById(id).orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
+        AuthorDetailDto authorDetailDto = new AuthorDetailDto(author.getId(), author.getName(), author.getEmail());
+
+        return authorDetailDto;
     }
 
     // 비밀번호 변경
