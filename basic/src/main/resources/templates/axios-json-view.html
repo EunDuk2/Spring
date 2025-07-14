@@ -20,6 +20,7 @@
         const email = document.getElementById("email").value;
         const serverData = {name, email};
         const result = await axios.post("http://localhost:8080/hello/axios-json-view", serverData);
+        console.log(result);
         alert("성공적으로 가입되었습니다.");
     }
 </script>

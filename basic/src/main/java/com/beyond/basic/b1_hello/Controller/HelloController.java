@@ -18,7 +18,7 @@ import java.util.List;
 public class HelloController {
     // get 요쳥의 case들
     // case1. 서버가 사용자에게 단순 String 데이터 return - @ResponseBody 있을 때
-    @GetMapping("") // 아래 메서드에 대한  서버의 end 포인트를 설정
+    @GetMapping("/aaa") // 아래 메서드에 대한  서버의 end 포인트를 설정
     // ResponseBody가 없고, return 타입이 String인 경우 서버는 templates 폴더 밑에 helloworld.html을 찾아서 리턴
     // 우리는 서버에서 화면을 만들지는 않음
     @ResponseBody
@@ -108,7 +108,7 @@ public class HelloController {
     }
     @PostMapping("/form-view")
     @ResponseBody
-    // get 요청에 url에 파라미터 방식과 동일한 데이터 형식이므로, RequestParam 또는 데이터바인딩 방식 가능
+    // get 요청의 url에 파라미터 방식과 동일한 데이터 형식이므로, RequestParam 또는 데이터바인딩 방식 가능
     public String formViewPost(@ModelAttribute Hello hello) {
         System.out.println(hello);
         return "ok";
@@ -185,8 +185,13 @@ public class HelloController {
     }
     @PostMapping("/axios-json-file-view")
     @ResponseBody
-    public String axiosJsonFileViewPost() {
-//        System.out.println(student);
+    public String axiosJsonFileViewPost(
+            // json과 file을 함께 처리해야 할 때, requestPart를 일반적으로 활용.
+            @RequestPart("hello") Hello hello,
+            @RequestPart("photo") MultipartFile photo
+    ) {
+        System.out.println(hello);
+        System.out.println(photo.getOriginalFilename());
         return "ok";
     }
 }
