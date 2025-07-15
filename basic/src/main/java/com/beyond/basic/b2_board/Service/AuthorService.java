@@ -1,5 +1,6 @@
 package com.beyond.basic.b2_board.Service;
 
+import com.beyond.basic.b2_board.Repository.AuthorJdbcRepository;
 import com.beyond.basic.b2_board.Repository.AuthorMemoryRepository;
 import com.beyond.basic.b2_board.domain.Author;
 import com.beyond.basic.b2_board.dto.AuthorCreateDto;
@@ -8,14 +9,16 @@ import com.beyond.basic.b2_board.dto.AuthorListDto;
 import com.beyond.basic.b2_board.dto.AuthorUpdatePwDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service // Component로도 대체 가능 (트랜잭션 처리가 없는 경우에만)
-// @Transaction 필요 (DB 사용할 때)
+@Transactional // 스프링에서 메서드 단위로 트랜잭션 처리를 하고, 만약 예외(unchecked) 발생 시 자동으로 롤백 처리 지원
 @RequiredArgsConstructor
 public class AuthorService {
 
@@ -38,56 +41,63 @@ public class AuthorService {
     // 의존성 주입(DI) 방법 3. RequiredArgs 어노테이션 사용
     // -> 반드시 초기화 되어야 하는 필드(final 등)을 대상으로 생성자를 자동 생성 해주는 어노테이션
     // 다형성 설계는 불가능
-    private final AuthorMemoryRepository authorMemoryRepository;
+    private final AuthorJdbcRepository authorRepository;
 
 
 
     // 회원가입 (객체 조립은 서비스 담당)
     public void save(AuthorCreateDto authorCreateDto) throws IllegalArgumentException {
         // 이메일 중복 검증
-        boolean isValidEmail = this.authorMemoryRepository.isValidEmail(authorCreateDto.getEmail());
-        if(isValidEmail) throw new IllegalArgumentException("중복되는 이메일입니다.");
+//        boolean isValidEmail = this.authorRepository.isValidEmail(authorCreateDto.getEmail());
+//        if(isValidEmail) throw new IllegalArgumentException("중복되는 이메일입니다.");
+        boolean isEmpty = this.authorRepository.findByEmail(authorCreateDto.getEmail()).isPresent();
+        if(isEmpty) throw new IllegalArgumentException("중복되는 이메일입니다.");
 
         // 비밀번호 길이 검증
         if(authorCreateDto.getPassword().length() < 5) throw new IllegalArgumentException("비밀번호 길이가 짧습니다. (5자 이상)");
 
         // 회원가입 완료
-        Author author = new Author(authorCreateDto.getName(), authorCreateDto.getEmail(),
-                authorCreateDto.getPassword());
-        this.authorMemoryRepository.save(author);
+//        Author author = new Author(authorCreateDto.getName(), authorCreateDto.getEmail(),
+//                authorCreateDto.getPassword());
+        // authorToEntity()를 통해 한 번에 변환
+        Author author = authorCreateDto.authorToEntity();
+        this.authorRepository.save(author);
     }
 
     public List<AuthorListDto> findAll() {
-        List<AuthorListDto> authorListDto = new ArrayList<>();
-        List<Author> authorList = this.authorMemoryRepository.findAll();
-        for(Author a : authorList) {
-            authorListDto.add(new AuthorListDto(a.getId(), a.getName(), a.getEmail()));
-        }
+//        List<AuthorListDto> authorListDto = new ArrayList<>();
+//        List<Author> authorList = this.authorMemoryRepository.findAll();
+//        for(Author a : authorList) {
+//            authorListDto.add(new AuthorListDto(a.getId(), a.getName(), a.getEmail()));
+//
+//        }
+//        return authorListDto;
 
-        return authorListDto;
+        return this.authorRepository.findAll().stream().map(a -> a.listfromEntity()).collect(Collectors.toList());
     }
 
     // orElseThrow -> NoSuchElement
     // 회원 상세 조회
     public AuthorDetailDto findById(Long id) throws NoSuchElementException {
-        Author author = this.authorMemoryRepository.findById(id).orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
-        AuthorDetailDto authorDetailDto = new AuthorDetailDto(author.getId(), author.getName(), author.getEmail());
-
-        return authorDetailDto;
+        Author author = this.authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
+//        return new AuthorDetailDto(author.getId(), author.getName(), author.getEmail());
+//        return author.detailfromEntity();
+        AuthorDetailDto dto = AuthorDetailDto.fromEntity(author);
+        return dto;
     }
 
     // 비밀번호 변경
     public void updatePassword(AuthorUpdatePwDto authorUpdatePwDto) {
         String newPassword = authorUpdatePwDto.getPassword();
         String email = authorUpdatePwDto.getEmail();
-        Optional<Author> optionalAuthor = authorMemoryRepository.getAuthorByEmail(email);
+        Optional<Author> optionalAuthor = authorRepository.getAuthorByEmail(email);
         Author author = optionalAuthor.orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
         author.updatePw(newPassword);
     }
 
     // 회원 탈퇴
     public void delete(Long id) {
-        this.authorMemoryRepository.findById(id).orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
-        this.authorMemoryRepository.delete(id);
+        this.authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
+        this.authorRepository.delete(id);
     }
 }

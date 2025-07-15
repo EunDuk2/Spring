@@ -1,12 +1,11 @@
 package com.beyond.basic.b2_board.Controller;
 
 import com.beyond.basic.b2_board.Service.AuthorService;
-import com.beyond.basic.b2_board.dto.AuthorCreateDto;
-import com.beyond.basic.b2_board.dto.AuthorDetailDto;
-import com.beyond.basic.b2_board.dto.AuthorListDto;
-import com.beyond.basic.b2_board.dto.AuthorUpdatePwDto;
+import com.beyond.basic.b2_board.dto.*;
 import com.sun.nio.sctp.IllegalReceiveException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,13 +19,18 @@ public class AuthorController {
 
     // 회원가입
     @PostMapping("/create")
-    public String save(@RequestBody AuthorCreateDto authorCreateDto) {
-        try {
-            this.authorService.save(authorCreateDto);
-        } catch (IllegalReceiveException e) {
-            return(e.toString());
-        }
-        return "ok";
+    public ResponseEntity<String> save(@RequestBody AuthorCreateDto authorCreateDto) {
+//        try {
+//            this.authorService.save(authorCreateDto);
+//            return new ResponseEntity<>("ok", HttpStatus.CREATED);
+//        } catch (IllegalArgumentException e) {
+//            e.printStackTrace();
+//            // 생성자 매개변수 body부분의 객체와 header부에 상태코드
+//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+//        }
+        // controllerAdvice가 없었으면 위와 같이 개별적인 예외처리가 필요하나, 이제는 전역적인 예외처리가 가능.
+        this.authorService.save(authorCreateDto);
+        return new ResponseEntity<>("ok", HttpStatus.CREATED);
     }
 
     // 회원 목록 조회 (/list)
@@ -40,39 +44,49 @@ public class AuthorController {
     // 회원 상세 조회 : id로 조회 (/detail/1)
     // 서버에서 별도의 try catch를 하지 않으면, 에러 발생 시 500에러 + 스프링의 포맷으로 에러 리턴.
     @GetMapping("/detail/{inputId}")
-    public AuthorDetailDto findById(@PathVariable Long inputId) {
+    public ResponseEntity<?> findById(@PathVariable Long inputId) { // AuthorDetailDto
+//        AuthorDetailDto authorDetailDto = null;
+//        try {
+//            authorDetailDto = this.authorService.findById(inputId);
+////            return new ResponseEntity<>(authorDetailDto, HttpStatus.OK); // authorDetailDto
+//            return new ResponseEntity<>(new CommonDto(authorDetailDto,
+//                    HttpStatus.CREATED.value(), "author created successfully!"), HttpStatus.OK);
+//        } catch(NoSuchElementException e) {
+//            e.printStackTrace();
+////            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+//            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.NO_CONTENT.value(),
+//                    e.getMessage()), HttpStatus.NOT_FOUND);
+//        }
         AuthorDetailDto authorDetailDto = null;
-        try {
-            authorDetailDto = this.authorService.findById(inputId);
-            return authorDetailDto;
-        } catch(NoSuchElementException e) {
-            e.printStackTrace();
-        }
-        return null;
+        authorDetailDto = this.authorService.findById(inputId);
+        return new ResponseEntity<>(new CommonDto(authorDetailDto,
+                HttpStatus.CREATED.value(), "author select successfully!"), HttpStatus.OK);
     }
 
     // 비밀번호 수정 (email, password -> json) (/updatepw)
     // get : 조회, post : 등록, patch : 부분 수정, put : 대체, delete :
     // patch method 사용
     @PatchMapping("/updatepw")
-    public String updatePassword(@RequestBody AuthorUpdatePwDto authorUpdatePwDto) {
+    public ResponseEntity<String> updatePassword(@RequestBody AuthorUpdatePwDto authorUpdatePwDto) {
         try {
             this.authorService.updatePassword(authorUpdatePwDto);
+            return new ResponseEntity<>("ok", HttpStatus.OK);
         } catch(NoSuchElementException e) {
             e.printStackTrace();
-            return "failed";
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NO_CONTENT);
         }
-        return "ok";
     }
 
     // 회원 탈퇴 (/author/1)
     // delete method 사용
     @DeleteMapping("/delete/{inputId}")
-    public void deleteAuthor(@PathVariable Long inputId) {
+    public ResponseEntity<String> deleteAuthor(@PathVariable Long inputId) {
         try {
             authorService.delete(inputId);
+            return new ResponseEntity<>("ok", HttpStatus.OK);
         } catch(NoSuchElementException e) {
             e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NO_CONTENT);
         }
     }
 }
