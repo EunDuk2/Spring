@@ -82,6 +82,7 @@ public class AuthorService {
         Author author = this.authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
 //        return new AuthorDetailDto(author.getId(), author.getName(), author.getEmail());
 //        return author.detailfromEntity();
+//        AuthorDetailDto dto = author.detailfromEntity();
         AuthorDetailDto dto = AuthorDetailDto.fromEntity(author);
         return dto;
     }

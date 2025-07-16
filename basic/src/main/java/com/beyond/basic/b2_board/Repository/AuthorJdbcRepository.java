@@ -47,7 +47,27 @@ public class AuthorJdbcRepository {
     @Transactional(readOnly = true)
     // 회원 목록 조회
     public List<Author> findAll() {
-        return null;
+        List<Author> authorList = new ArrayList<>();
+        Author author = null;
+        try {
+            Connection connection = dataSource.getConnection();
+            String sql = "select * from author";
+            PreparedStatement ps = connection.prepareStatement(sql);
+//            ps.setLong(1, inputId);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+//                rs.next();
+                Long id = rs.getLong("id");
+                String name = rs.getString("name");
+                String email = rs.getString("email");
+                String password = rs.getString("password");
+                author = new Author(id, name, email, password);
+                authorList.add(author);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return authorList;
     }
 
     @Transactional(readOnly = true)
@@ -60,13 +80,13 @@ public class AuthorJdbcRepository {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setLong(1, inputId);
             ResultSet rs = ps.executeQuery();
-            rs.next();
-            Long id = rs.getLong("id");
-            String name = rs.getString("name");
-            String email = rs.getString("email");
-            String password = rs.getString("password");
-            author = new Author(id, name, email, password);
-
+            if(rs.next()) {
+                Long id = rs.getLong("id");
+                String name = rs.getString("name");
+                String email = rs.getString("email");
+                String password = rs.getString("password");
+                author = new Author(id, name, email, password);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -96,13 +116,17 @@ public class AuthorJdbcRepository {
 
     // 회원 탈퇴
     public void delete(Long id) {
-
+        try {
+            Connection connection = dataSource.getConnection();
+            String sql = "delete from author where id = ?";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setLong(1, id);
+            ps.executeUpdate(); // 삭제도 executeUpdate
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    // 검증 (true : 이메일 존재 / false : 이메일 없음)
-    public boolean isValidEmail(String email) {
-        return true;
-    }
     public Optional<Author> getAuthorByEmail(String email) {
         return null;
     }
