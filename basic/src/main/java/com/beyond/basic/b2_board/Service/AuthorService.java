@@ -1,7 +1,8 @@
 package com.beyond.basic.b2_board.Service;
 
-import com.beyond.basic.b2_board.Repository.AuthorJdbcRepository;
+import com.beyond.basic.b2_board.Repository.AuthorJpaRepository;
 import com.beyond.basic.b2_board.Repository.AuthorMemoryRepository;
+import com.beyond.basic.b2_board.Repository.AuthorMybatisRepository;
 import com.beyond.basic.b2_board.domain.Author;
 import com.beyond.basic.b2_board.dto.AuthorCreateDto;
 import com.beyond.basic.b2_board.dto.AuthorDetailDto;
@@ -41,7 +42,7 @@ public class AuthorService {
     // 의존성 주입(DI) 방법 3. RequiredArgs 어노테이션 사용
     // -> 반드시 초기화 되어야 하는 필드(final 등)을 대상으로 생성자를 자동 생성 해주는 어노테이션
     // 다형성 설계는 불가능
-    private final AuthorJdbcRepository authorRepository;
+    private final AuthorJpaRepository authorRepository;
 
 
 
@@ -91,9 +92,11 @@ public class AuthorService {
     public void updatePassword(AuthorUpdatePwDto authorUpdatePwDto) {
         String newPassword = authorUpdatePwDto.getPassword();
         String email = authorUpdatePwDto.getEmail();
-        Optional<Author> optionalAuthor = authorRepository.getAuthorByEmail(email);
+//        Optional<Author> optionalAuthor = authorRepository.getAuthorByEmail(email);
+        Optional<Author> optionalAuthor = authorRepository.findByEmail(email);
         Author author = optionalAuthor.orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
-        author.updatePw(newPassword);
+        // dirty checking : 객체를 수정한 후에 별도의 updqte쿼리 발생시키지 않아도, 영속성 컨텍스트에 의해 객체 변경사항 자동 DB 반영
+        author.updatePw(newPassword); // jpa -> 객체가 수정되면 자동으로 쿼리가 나간다.
     }
 
     // 회원 탈퇴
