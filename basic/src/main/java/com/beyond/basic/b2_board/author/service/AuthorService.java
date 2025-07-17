@@ -1,18 +1,15 @@
-package com.beyond.basic.b2_board.Service;
+package com.beyond.basic.b2_board.author.service;
 
-import com.beyond.basic.b2_board.Repository.AuthorJpaRepository;
-import com.beyond.basic.b2_board.Repository.AuthorMemoryRepository;
-import com.beyond.basic.b2_board.Repository.AuthorMybatisRepository;
-import com.beyond.basic.b2_board.domain.Author;
-import com.beyond.basic.b2_board.dto.AuthorCreateDto;
-import com.beyond.basic.b2_board.dto.AuthorDetailDto;
-import com.beyond.basic.b2_board.dto.AuthorListDto;
-import com.beyond.basic.b2_board.dto.AuthorUpdatePwDto;
+import com.beyond.basic.b2_board.author.repository.AuthorRepository;
+import com.beyond.basic.b2_board.author.domain.Author;
+import com.beyond.basic.b2_board.author.dto.AuthorCreateDto;
+import com.beyond.basic.b2_board.author.dto.AuthorDetailDto;
+import com.beyond.basic.b2_board.author.dto.AuthorListDto;
+import com.beyond.basic.b2_board.author.dto.AuthorUpdatePwDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -42,7 +39,7 @@ public class AuthorService {
     // 의존성 주입(DI) 방법 3. RequiredArgs 어노테이션 사용
     // -> 반드시 초기화 되어야 하는 필드(final 등)을 대상으로 생성자를 자동 생성 해주는 어노테이션
     // 다형성 설계는 불가능
-    private final AuthorJpaRepository authorRepository;
+    private final AuthorRepository authorRepository;
 
 
 
@@ -101,7 +98,7 @@ public class AuthorService {
 
     // 회원 탈퇴
     public void delete(Long id) {
-        this.authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
-        this.authorRepository.delete(id);
+        Author author = this.authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
+        this.authorRepository.delete(author);
     }
 }

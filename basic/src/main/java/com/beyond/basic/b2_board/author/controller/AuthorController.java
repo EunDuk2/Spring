@@ -1,8 +1,8 @@
-package com.beyond.basic.b2_board.Controller;
+package com.beyond.basic.b2_board.author.controller;
 
-import com.beyond.basic.b2_board.Service.AuthorService;
-import com.beyond.basic.b2_board.dto.*;
-import com.sun.nio.sctp.IllegalReceiveException;
+import com.beyond.basic.b2_board.author.service.AuthorService;
+import com.beyond.basic.b2_board.author.dto.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,8 @@ public class AuthorController {
 
     // 회원가입
     @PostMapping("/create")
-    public ResponseEntity<String> save(@RequestBody AuthorCreateDto authorCreateDto) {
+    // dto에 있는 validation어노테이션과 controller @Valid 한쌍
+    public ResponseEntity<String> save(@Valid @RequestBody AuthorCreateDto authorCreateDto) {
 //        try {
 //            this.authorService.save(authorCreateDto);
 //            return new ResponseEntity<>("ok", HttpStatus.CREATED);
