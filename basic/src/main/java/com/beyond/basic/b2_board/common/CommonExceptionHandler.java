@@ -1,4 +1,4 @@
-package com.beyond.basic.b2_board.author.common;
+package com.beyond.basic.b2_board.common;
 
 import com.beyond.basic.b2_board.author.dto.CommonErrorDto;
 import org.springframework.http.HttpStatus;

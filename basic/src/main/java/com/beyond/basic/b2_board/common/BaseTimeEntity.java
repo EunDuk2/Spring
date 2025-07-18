@@ -1,4 +1,4 @@
-package com.beyond.basic.b2_board.author.common;
+package com.beyond.basic.b2_board.common;
 
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
