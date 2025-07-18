@@ -23,13 +23,13 @@ public class AuthorDetailDto {
     private LocalDateTime createdTime;
 
     // 1개의 entity로만 dto가 조립되는 것이 아니기에, dto계층에서 fromEntity를 설계
-    public static AuthorDetailDto fromEntity(Author author, Integer postCount) {
+    public static AuthorDetailDto fromEntity(Author author) {
         return AuthorDetailDto.builder()
                 .id(author.getId())
                 .name(author.getName())
                 .email(author.getEmail())
                 .role(author.getRole())
-                .postCount(postCount)
+                .postCount(author.getPostList().size())
                 .createdTime(author.getCreatedTime())
                 .build();
     }

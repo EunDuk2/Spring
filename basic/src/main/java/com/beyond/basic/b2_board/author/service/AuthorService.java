@@ -85,9 +85,14 @@ public class AuthorService {
 //        return author.detailfromEntity();
 //        AuthorDetailDto dto = author.detailfromEntity();
 
+        // 연관관계 설정 없이 직접 조회해서 count값 찾는 경우
         List<Post> postList = postRepository.findByAuthor(author);
 //        List<Post> postList2 = postRepository.findByAuthorId(id);
-        AuthorDetailDto dto = AuthorDetailDto.fromEntity(author, postList.size());
+//        AuthorDetailDto dto = AuthorDetailDto.fromEntity(author, postList.size());
+
+        // OneToMany 연관관계 설정을 통해 count값 찾는 경우
+        AuthorDetailDto dto = AuthorDetailDto.fromEntity(author);
+
         return dto;
     }
 
