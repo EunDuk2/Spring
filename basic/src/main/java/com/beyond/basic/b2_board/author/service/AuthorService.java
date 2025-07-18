@@ -6,6 +6,8 @@ import com.beyond.basic.b2_board.author.dto.AuthorCreateDto;
 import com.beyond.basic.b2_board.author.dto.AuthorDetailDto;
 import com.beyond.basic.b2_board.author.dto.AuthorListDto;
 import com.beyond.basic.b2_board.author.dto.AuthorUpdatePwDto;
+import com.beyond.basic.b2_board.post.domain.Post;
+import com.beyond.basic.b2_board.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +42,7 @@ public class AuthorService {
     // -> 반드시 초기화 되어야 하는 필드(final 등)을 대상으로 생성자를 자동 생성 해주는 어노테이션
     // 다형성 설계는 불가능
     private final AuthorRepository authorRepository;
+    private final PostRepository postRepository;
 
 
 
@@ -81,7 +84,10 @@ public class AuthorService {
 //        return new AuthorDetailDto(author.getId(), author.getName(), author.getEmail());
 //        return author.detailfromEntity();
 //        AuthorDetailDto dto = author.detailfromEntity();
-        AuthorDetailDto dto = AuthorDetailDto.fromEntity(author);
+
+        List<Post> postList = postRepository.findByAuthor(author);
+//        List<Post> postList2 = postRepository.findByAuthorId(id);
+        AuthorDetailDto dto = AuthorDetailDto.fromEntity(author, postList.size());
         return dto;
     }
 

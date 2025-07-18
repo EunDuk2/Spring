@@ -1,13 +1,17 @@
 package com.beyond.basic.b2_board.author.domain;
 
+import com.beyond.basic.b2_board.author.common.BaseTimeEntity;
 import com.beyond.basic.b2_board.author.dto.AuthorDetailDto;
 import com.beyond.basic.b2_board.author.dto.AuthorListDto;
+import com.beyond.basic.b2_board.post.domain.Post;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -19,7 +23,7 @@ import java.time.LocalDateTime;
 @Entity
 // Builder 어노테이션을 통해 유연하게 객체 생성 가능하다.
 @Builder
-public class Author {
+public class Author extends BaseTimeEntity {
     @Id // pk 설정
     // IDENTITY : auto_increment, AUTO : id 생성 전략을 jpa에게 자동설정하도록 위임하는 것.
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,25 +38,33 @@ public class Author {
     private String password;
 
     // 컬럼명에 캐멀케이스 사용 시, db에는 created_time으로 컬럼 생성
-    @CreationTimestamp // DB 설정에는 current_timestamp() 없음
-    private LocalDateTime createdTime;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedTime;
+//    @CreationTimestamp // DB 설정에는 current_timestamp() 없음
+//    private LocalDateTime createdTime;
+//
+//    @UpdateTimestamp
+//    private LocalDateTime updatedTime;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default // 빌더패턴에서 변수 초기화(디폴트 값)시 Builder.Default 어노테이션 필수
     private Role role = Role.USER;
 
-
+    // OneToMany는 선택사항. 또한 default가 lazy
+    // mappedBy에는 ManyToOne쪽에 변수명을 문자열로 지정. FK 관리를 반대편(post)쪽에서 한다는 의미 -> 연관 관계의 주인 설정
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY) // default가 lazy이지만 헷갈릴 수 있음 (ManyToOne이랑)
+    @Builder.Default
+    List<Post> postList = new ArrayList<>();
 
     public void updatePw(String password) {
         this.password = password;
     }
 
-    public AuthorDetailDto detailfromEntity() {
-        return new AuthorDetailDto(this.id, this.name, this.email);
-    }
+//    public AuthorDetailDto detailfromEntity() {
+//        return AuthorDetailDto.builder()
+//                .id(this.id)
+//                .name(this.name)
+//                .email(this.email)
+//                .build();
+//    }
     public AuthorListDto listfromEntity() {
         return new AuthorListDto(this.id, this.name, this.email);
     }
