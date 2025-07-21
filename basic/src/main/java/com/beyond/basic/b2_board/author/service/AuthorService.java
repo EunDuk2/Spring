@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service // Component로도 대체 가능 (트랜잭션 처리가 없는 경우에만)
-@Transactional // 스프링에서 메서드 단위로 트랜잭션 처리를 하고, 만약 예외(unchecked) 발생 시 자동으로 롤백 처리 지원
+@Transactional // 스프링에서 메서드 단위로 트랜잭션 처리(commit)를 하고, 만약 예외(unchecked) 발생 시 자동으로 롤백 처리 지원
 @RequiredArgsConstructor
 public class AuthorService {
 
@@ -62,6 +62,22 @@ public class AuthorService {
 //                authorCreateDto.getPassword());
         // authorToEntity()를 통해 한 번에 변환
         Author author = authorCreateDto.authorToEntity();
+
+
+        // cascading 테스트 : 회원이 생성될 때, 곧바로 "가입인사" 글을 생성하는 상황
+        // 방법 2가지
+        // 방법1. 직접 Post객체 생성 후 저장
+        Post post = Post.builder()
+                .title("안녕하세요")
+                .contents(authorCreateDto.getName() + "입니다. 반갑습니다.")
+                .delYn("N")
+                // author객체가 DB에 save되는 순간 엔티티매니저에 영속성컨텍스트 의해 author객체에도 id값 생성
+                .author(author)
+                .build();
+
+//        postRepository.save(post);
+        // 방법2. cascade옵션 활용
+        author.getPostList().add(post);
         this.authorRepository.save(author);
     }
 
