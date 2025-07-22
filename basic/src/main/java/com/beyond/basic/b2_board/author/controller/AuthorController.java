@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,6 +51,8 @@ public class AuthorController {
 
     // 회원 목록 조회 (/list)
     @GetMapping("/list")
+    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')") // 2명 권한
     public List<AuthorListDto> listAuthors() {
         List<AuthorListDto> authorListDto = this.authorService.findAll();
         System.out.println(authorListDto);
@@ -59,6 +62,8 @@ public class AuthorController {
     // 회원 상세 조회 : id로 조회 (/detail/1)
     // 서버에서 별도의 try catch를 하지 않으면, 에러 발생 시 500에러 + 스프링의 포맷으로 에러 리턴.
     @GetMapping("/detail/{inputId}")
+    // ADMIN 권한이 있는 지를 autentication 객체에서 쉽게 확인
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> findById(@PathVariable Long inputId) { // AuthorDetailDto
 //        AuthorDetailDto authorDetailDto = null;
 //        try {
