@@ -1,7 +1,9 @@
 package com.beyond.basic.b2_board.author.controller;
 
+import com.beyond.basic.b2_board.author.domain.Author;
 import com.beyond.basic.b2_board.author.service.AuthorService;
 import com.beyond.basic.b2_board.author.dto.*;
+import com.beyond.basic.b2_board.common.JwtTokenProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import java.util.NoSuchElementException;
 @RequestMapping("/author")
 public class AuthorController {
     private final AuthorService authorService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입
     @PostMapping("/create")
@@ -32,6 +35,17 @@ public class AuthorController {
         // controllerAdvice가 없었으면 위와 같이 개별적인 예외처리가 필요하나, 이제는 전역적인 예외처리가 가능.
         this.authorService.save(authorCreateDto);
         return new ResponseEntity<>("ok", HttpStatus.CREATED);
+    }
+
+    // 로그인 (/author/doLogin)
+    @PostMapping("/doLogin")
+    public ResponseEntity<?> doLogin(@Valid @RequestBody AuthorLoginDto dto) {
+        Author author = authorService.doLogin(dto);
+
+        // 토큰 생성 및 return
+        String token = jwtTokenProvider.createAtToken(author);
+
+        return new ResponseEntity<>(new CommonDto(token, HttpStatus.OK.value(), "로그인 성공"), HttpStatus.OK);
     }
 
     // 회원 목록 조회 (/list)

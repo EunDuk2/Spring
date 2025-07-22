@@ -1,14 +1,12 @@
 package com.beyond.basic.b2_board.author.service;
 
+import com.beyond.basic.b2_board.author.dto.*;
 import com.beyond.basic.b2_board.author.repository.AuthorRepository;
 import com.beyond.basic.b2_board.author.domain.Author;
-import com.beyond.basic.b2_board.author.dto.AuthorCreateDto;
-import com.beyond.basic.b2_board.author.dto.AuthorDetailDto;
-import com.beyond.basic.b2_board.author.dto.AuthorListDto;
-import com.beyond.basic.b2_board.author.dto.AuthorUpdatePwDto;
 import com.beyond.basic.b2_board.post.domain.Post;
 import com.beyond.basic.b2_board.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +41,7 @@ public class AuthorService {
     // 다형성 설계는 불가능
     private final AuthorRepository authorRepository;
     private final PostRepository postRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
 
@@ -61,7 +60,10 @@ public class AuthorService {
 //        Author author = new Author(authorCreateDto.getName(), authorCreateDto.getEmail(),
 //                authorCreateDto.getPassword());
         // authorToEntity()를 통해 한 번에 변환
-        Author author = authorCreateDto.authorToEntity();
+
+        String encodePassword = passwordEncoder.encode(authorCreateDto.getPassword()); // 암호화된 password
+
+        Author author = authorCreateDto.authorToEntity(encodePassword);
 
 
         // cascading 테스트 : 회원이 생성될 때, 곧바로 "가입인사" 글을 생성하는 상황
@@ -80,6 +82,19 @@ public class AuthorService {
         author.getPostList().add(post);
         this.authorRepository.save(author);
     }
+
+    public Author doLogin(AuthorLoginDto dto) {
+
+        // 강사님은 check true로 두고 아래 둘 중 하나라도 false이면 "이메일 또는 비밀번호가 잘못되었습니다." 로 예외 던지기
+        Author author = this.authorRepository.findByEmail(dto.getEmail()).orElseThrow(() -> new NoSuchElementException("없는 회원입니다."));
+
+        // 비밀번호 일치여부 검증 코드
+        boolean check = passwordEncoder.matches(dto.getPassword(), author.getPassword());
+        if(!check) throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+
+        return author;
+    }
+
 
     public List<AuthorListDto> findAll() {
 //        List<AuthorListDto> authorListDto = new ArrayList<>();
