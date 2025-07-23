@@ -5,7 +5,10 @@ import com.beyond.basic.b2_board.author.repository.AuthorRepository;
 import com.beyond.basic.b2_board.author.domain.Author;
 import com.beyond.basic.b2_board.post.domain.Post;
 import com.beyond.basic.b2_board.post.repository.PostRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,6 +128,14 @@ public class AuthorService {
         AuthorDetailDto dto = AuthorDetailDto.fromEntity(author);
 
         return dto;
+    }
+
+    public AuthorDetailDto findByAuthentication() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Author author = authorRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+
+        return AuthorDetailDto.fromEntity(author);
     }
 
     // 비밀번호 변경

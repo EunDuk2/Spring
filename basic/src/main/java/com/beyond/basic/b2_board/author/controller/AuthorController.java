@@ -83,6 +83,14 @@ public class AuthorController {
                 HttpStatus.CREATED.value(), "author select successfully!"), HttpStatus.OK);
     }
 
+    @GetMapping("/myInfo")
+    public ResponseEntity<?> findMyInfo() {
+        AuthorDetailDto authorDetailDto = this.authorService.findByAuthentication();
+        return new ResponseEntity<>(new CommonDto(authorDetailDto,
+                HttpStatus.CREATED.value(), "마이페이지 출력 성공"), HttpStatus.OK);
+    }
+
+
     // 비밀번호 수정 (email, password -> json) (/updatepw)
     // get : 조회, post : 등록, patch : 부분 수정, put : 대체, delete :
     // patch method 사용

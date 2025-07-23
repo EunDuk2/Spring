@@ -16,6 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -33,7 +36,16 @@ public class PostService {
 //        Author author = authorRepository.findById(dto.getAuthorId()).orElseThrow(() -> new EntityNotFoundException("없는 사용자 입니다."));
         Author author = authorRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("없는 사용자 입니다."));
 
-        postRepository.save(dto.toEntity(author));
+        LocalDateTime appointmentTime = null;
+        if(dto.getAppointment().equals("Y")) {
+            if(dto.getAppointmentTime() == null || dto.getAppointmentTime().isEmpty()) {
+                throw new IllegalArgumentException("시간정보가 비어져 있습니다.");
+            }
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+            appointmentTime = LocalDateTime.parse(dto.getAppointmentTime(),dateTimeFormatter);
+        }
+
+        postRepository.save(dto.toEntity(author, appointmentTime));
     }
 
     public Page<PostListDto> findAll(Pageable pageable) {
@@ -47,7 +59,8 @@ public class PostService {
 
         // 페이지 처리 findAll 호출
 //        Page<Post> postList = postRepository.findAll(pageable); // Page 안에 stream 내장
-        Page<Post> postList = postRepository.findAllByDelYn(pageable, "N"); // where delYn="N"
+//        Page<Post> postList = postRepository.findAllByDelYn(pageable, "N"); // where delYn="N"
+        Page<Post> postList = postRepository.findAllByDelYnAndAppointment(pageable, "N", "N");
         return postList.map(a -> PostListDto.fromEntity(a));
     }
 
