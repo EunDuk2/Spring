@@ -20,9 +20,12 @@ import java.util.Arrays;
 @Configuration
 @RequiredArgsConstructor
 // PreAuthorized 어노테이션 사용하기 위한 어노테이션
-@EnableMethodSecurity
+// 권한이 없을 경우 filterchain에서 에러 발생
+@EnableMethodSecurity // PreAuthorized 를 미리 다 가져온다. (컨트롤러 딴에서 처리하는게 아님)
 public class SecurityConfig {
     private final JwtTokenFilter jwtTokenFilter;
+    private final JwtAutenticationHandler jwtAutenticationHandler;
+    private final JwtAuthorizationHandler jwtAuthorizationHandler;
 
     // 내가 만든 객체는 @Component, 외부 라이브러리를 활용한 객체는 Bean+Configuration
     // Bean은 메서드 위에 붙여 Return되는 객체를 싱글톤 객체로 생성. Component는 클래스 위에 붙여 클래스 자체를 클래스 자체를 싱글톤 객체로 생성
@@ -44,6 +47,12 @@ public class SecurityConfig {
                 // 아래 2코드는 중요
                 // token을 검증하고, token검증을 통해 Authentication 객체 생성
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class) // 무조건 여기로 가서 토큰 검증(정상이면 Au객체 만듬)
+
+                .exceptionHandling(e ->
+                        e.authenticationEntryPoint(jwtAutenticationHandler) // 401의 경우
+                                .accessDeniedHandler(jwtAuthorizationHandler) // 403의 경우
+                )
+
                 // 예외 api 정책 설정
                 // authenticated() : 예외를 제외한 모든 요청에 대해서 Authentication객체가 생성되기를 요구 (회원가입, 로그인은 Controller로 통과)
                 .authorizeHttpRequests(a -> a.requestMatchers("/author/create", "/author/doLogin").permitAll().anyRequest().authenticated())
