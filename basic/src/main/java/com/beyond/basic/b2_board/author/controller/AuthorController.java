@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -23,8 +24,17 @@ public class AuthorController {
 
     // 회원가입
     @PostMapping("/create")
+
+    /* 아래 코드 포스트맨 테스트 데이터 예시
+        1. form-data 선택
+        2. authorCreateDto를 Text로 json 값 세팅 / content-type을 application/json 설정
+        3. profileImage는 file로 세팅하면서 content-typedmf multipart/form-dat
+    */
+
     // dto에 있는 validation어노테이션과 controller @Valid 한쌍
-    public ResponseEntity<String> save(@Valid @RequestBody AuthorCreateDto authorCreateDto) {
+    public ResponseEntity<String> save(@RequestPart(name = "authorCreateDto") @Valid AuthorCreateDto authorCreateDto,
+                                       @RequestPart(name = "profileImage") MultipartFile profileImage
+    ) {
 //        try {
 //            this.authorService.save(authorCreateDto);
 //            return new ResponseEntity<>("ok", HttpStatus.CREATED);
@@ -34,7 +44,7 @@ public class AuthorController {
 //            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 //        }
         // controllerAdvice가 없었으면 위와 같이 개별적인 예외처리가 필요하나, 이제는 전역적인 예외처리가 가능.
-        this.authorService.save(authorCreateDto);
+        this.authorService.save(authorCreateDto, profileImage);
         return new ResponseEntity<>("ok", HttpStatus.CREATED);
     }
 

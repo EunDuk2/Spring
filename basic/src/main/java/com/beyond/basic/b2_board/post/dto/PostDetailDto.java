@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PostDetailDto {
     private Long id;
+    private String category;
     private String title;
     private String contents;
     private String authorEmail;
@@ -28,7 +29,9 @@ public class PostDetailDto {
 
     // 관계성 설정을 했을 때
     public static PostDetailDto fromEntity(Post post) {
-        return PostDetailDto.builder().id(post.getId())
+        return PostDetailDto.builder()
+                .id(post.getId())
+                .category(post.getCategory())
                 .title(post.getTitle())
                 .contents(post.getContents())
                 .authorEmail(post.getAuthor().getEmail())

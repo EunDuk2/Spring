@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class PostCreateDto {
+    private String category;
     @NotEmpty(message = "제목 비어있음")
     private String title;
     private String contents;
@@ -28,6 +29,7 @@ public class PostCreateDto {
 
     public Post toEntity(Author author, LocalDateTime localDateTime) {
         return Post.builder()
+                .category(this.category)
                 .title(this.title)
                 .contents(this.contents)
 //                .authorId(this.authorId)
