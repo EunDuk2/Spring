@@ -3,6 +3,7 @@ package com.beyond.basic.b2_board.author.controller;
 import com.beyond.basic.b2_board.author.domain.Author;
 import com.beyond.basic.b2_board.author.service.AuthorService;
 import com.beyond.basic.b2_board.author.dto.*;
+import com.beyond.basic.b2_board.common.CommonDto;
 import com.beyond.basic.b2_board.common.JwtTokenProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

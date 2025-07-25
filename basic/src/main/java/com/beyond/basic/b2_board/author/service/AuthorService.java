@@ -97,33 +97,32 @@ public class AuthorService {
 //        author.getPostList().add(post);
         this.authorRepository.save(author);
 
-        // 이미지명 설정
-        String fileName = "user-"+author.getId()+"-profileImage-"+profileImage.getOriginalFilename();
+        if(!profileImage.isEmpty()) {
+            // 이미지명 설정
+            String fileName = "user-"+author.getId()+"-profileImage-"+profileImage.getOriginalFilename();
 
-        System.out.println(fileName);
+            // 저장 객체 구성
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(fileName)
+                    .contentType(profileImage.getContentType()) // image/jpeg ...
+                    .build();
 
-        // 저장 객체 구성
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucket)
-                .key(fileName)
-                .contentType(profileImage.getContentType()) // image/jpeg ...
-                .build();
+            // 이미지를 업로드 (byte 형태로)
+            try {
+                s3Client.putObject(putObjectRequest, RequestBody.fromBytes(profileImage.getBytes()));
+            } catch (IOException e) {
+                // checked -> unchecked로 바꿔 전체 rollback 되도록 예외처리
+                throw new IllegalArgumentException("이미지 업로드 실패");
+            }
+            // image Url 추출
+            String imgUrl = s3Client.utilities()
+                    .getUrl(a -> a.bucket(bucket).key(fileName)) // ← key 추가
+                    .toExternalForm(); // ToDo - 예외처리 필요
 
-        // 이미지를 업로드 (byte 형태로)
-        try {
-            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(profileImage.getBytes()));
-        } catch (IOException e) {
-            // checked -> unchecked로 바꿔 전체 rollback 되도록 예외처리
-            throw new IllegalArgumentException("이미지 업로드 실패");
+
+            author.setProfileImage(imgUrl);
         }
-        // image Url 추출
-        String imgUrl = s3Client.utilities()
-                .getUrl(a -> a.bucket(bucket).key(fileName)) // ← key 추가
-                .toExternalForm();
-
-
-        author.setProfileImage(imgUrl);
-
     }
 
     public Author doLogin(AuthorLoginDto dto) {

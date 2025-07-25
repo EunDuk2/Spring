@@ -1,6 +1,6 @@
 package com.beyond.basic.b2_board.common;
 
-import com.beyond.basic.b2_board.author.dto.CommonErrorDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,6 +11,7 @@ import java.util.NoSuchElementException;
 
 // Controller 어노테이션이 붙어있는 클래스의 모든 예외를 모니터링하여 예외를 인터셉팅
 @ControllerAdvice
+@Slf4j
 public class CommonExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -20,6 +21,9 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<?> noSuchElementException(NoSuchElementException e) {
+
+        log.error("[HANSOOM][ERROR] - NoSuchElementException - {}", e.getMessage());
+
         return new ResponseEntity<>(new CommonErrorDto(HttpStatus.NOT_FOUND.value(), e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
@@ -33,6 +37,10 @@ public class CommonExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> error(Exception e) {
+        return new ResponseEntity<>(new CommonErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
 
 }

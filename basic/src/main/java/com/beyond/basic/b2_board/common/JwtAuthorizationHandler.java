@@ -1,6 +1,5 @@
 package com.beyond.basic.b2_board.common;
 
-import com.beyond.basic.b2_board.author.dto.CommonErrorDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
