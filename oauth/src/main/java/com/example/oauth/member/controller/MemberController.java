@@ -2,8 +2,9 @@ package com.example.oauth.member.controller;
 
 import com.example.oauth.common.auth.JwtTokenProvider;
 import com.example.oauth.member.domain.Member;
-import com.example.oauth.member.dto.MemberCreateDto;
-import com.example.oauth.member.dto.MemberLoginDto;
+import com.example.oauth.member.domain.SocialType;
+import com.example.oauth.member.dto.*;
+import com.example.oauth.member.service.GoogleService;
 import com.example.oauth.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class MemberController {
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final GoogleService googleService;
 
     @PostMapping("/create")
     public ResponseEntity<?> memberCreate(@RequestBody MemberCreateDto memberCreateDto)  {
@@ -39,6 +41,28 @@ public class MemberController {
 
         Map<String, Object> loginInfo = new HashMap<>();
         loginInfo.put("id", member.getId());
+        loginInfo.put("token", jwtToken);
+
+        return new ResponseEntity<>(loginInfo, HttpStatus.OK);
+    }
+
+    @PostMapping("/google/doLogin")
+    public ResponseEntity<?> googleLogin(@RequestBody RedirectDto redirectDto) {
+        // accessToken 발급
+        AccessTokenDto accessTokenDto = googleService.getAccessToken(redirectDto.getCode());
+        // 사용자 정보 얻기
+        GoogleProfileDto googleProfileDto = googleService.getGoogleProfile(accessTokenDto.getAccess_token());
+        // 회원가입이 되어있지 않다면 회원가입
+        Member originalMember = memberService.getMemberBySocialId(googleProfileDto.getSub());
+        if(originalMember == null) {
+            originalMember = memberService.createOauth(googleProfileDto.getSub(), googleProfileDto.getEmail(), SocialType.GOOGLE);
+        }
+
+        // 회원가입이 되어 있는 회원이라면 토큰 발급
+        String jwtToken = jwtTokenProvider.createToken(originalMember.getEmail(), originalMember.getRole().toString());
+
+        Map<String, Object> loginInfo = new HashMap<>();
+        loginInfo.put("id", originalMember.getId());
         loginInfo.put("token", jwtToken);
 
         return new ResponseEntity<>(loginInfo, HttpStatus.OK);

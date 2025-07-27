@@ -1,6 +1,7 @@
 package com.example.oauth.member.service;
 
 import com.example.oauth.member.domain.Member;
+import com.example.oauth.member.domain.SocialType;
 import com.example.oauth.member.dto.MemberCreateDto;
 import com.example.oauth.member.dto.MemberLoginDto;
 import com.example.oauth.member.repository.MemberRepository;
@@ -38,6 +39,21 @@ public class MemberService {
         if(!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())){
             throw new IllegalArgumentException("password가 일치하지 않습니다.");
         }
+        return member;
+    }
+
+    public Member getMemberBySocialId(String socialId) {
+        Member member = memberRepository.findBySocialId(socialId).orElse(null);
+        return member;
+    }
+
+    public Member createOauth(String socialId, String email, SocialType socialType) {
+        Member member = Member.builder()
+                .email(email)
+                .socialType(socialType)
+                .socialId(socialId)
+                .build();
+        memberRepository.save(member);
         return member;
     }
 }
