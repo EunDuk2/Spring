@@ -26,27 +26,28 @@ public class JwtTokenFilter extends GenericFilter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         try {
+
             HttpServletRequest req = (HttpServletRequest) request;
             String bearerToken = req.getHeader("Authorization");
+
             if(bearerToken == null) {
                 // token이 없는 경우 다시 filterchain으로 되돌아가는 로직
                 chain.doFilter(request, response);
                 return;
             }
 
-//            String token = bearerToken.substring(7);
-//
-//            Claims claims = Jwts.parserBuilder()
-//                    .setSigningKey(secretKey)
-//                    .build()
-//                    .parseClaimsJws(token)
-//                    .getBody();
-//
-//            List<GrantedAuthority> authorityList = new ArrayList<>();
-//            authorityList.add(new SimpleGrantedAuthority("ROLE_"+claims.get("role")));
-//            Authentication authentication = new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authorityList);
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String token = bearerToken.substring(7);
 
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            List<GrantedAuthority> authorityList = new ArrayList<>();
+            authorityList.add(new SimpleGrantedAuthority("ROLE_"+claims.get("role")));
+            Authentication authentication = new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authorityList);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception e) {
             log.error(e.getMessage());
         }

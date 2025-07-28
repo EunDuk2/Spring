@@ -1,8 +1,10 @@
 package com.beyond.ordersystem.member.service;
 
+import com.beyond.ordersystem.member.dto.LoginReqDto;
 import com.beyond.ordersystem.member.domain.Member;
 import com.beyond.ordersystem.member.dto.MemberCreateDto;
 import com.beyond.ordersystem.member.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,12 @@ public class MemberService {
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
         Member member = memberRepository.save(dto.toEntity(encodedPassword));
         return member.getId();
+    }
+
+    public Member doLogin(LoginReqDto dto) {
+        Member member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+        if(!passwordEncoder.matches(dto.getPassword(), member.getPassword())) throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
+        return member;
     }
 
 }
