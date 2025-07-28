@@ -7,6 +7,8 @@ import com.beyond.ordersystem.member.dto.MemberResDto;
 import com.beyond.ordersystem.member.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,14 @@ public class MemberService {
     public List<MemberResDto> findAll() {
         List<MemberResDto> memberResDtoList = memberRepository.findAll().stream().map(a -> MemberResDto.fromEntity(a)).toList();
         return memberResDtoList;
+    }
+
+    public MemberResDto findMyInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+        return MemberResDto.fromEntity(member);
     }
 
 }

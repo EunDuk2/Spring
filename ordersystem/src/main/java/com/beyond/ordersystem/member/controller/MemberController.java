@@ -43,4 +43,10 @@ public class MemberController {
         List<MemberResDto> memberList = memberService.findAll();
         return new ResponseEntity<>(new CommonSuccessDto(memberList, HttpStatus.OK.value(), "사용자 목록 조회 성공"), HttpStatus.OK);
     }
+
+    @GetMapping("/myInfo")
+    public ResponseEntity<?> memberMyInfo() {
+        MemberResDto memberResDto = memberService.findMyInfo();
+        return new ResponseEntity<>(new CommonSuccessDto(memberResDto, HttpStatus.OK.value(), "마이페이지 조회 성공"), HttpStatus.OK);
+    }
 }
