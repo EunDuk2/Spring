@@ -5,6 +5,7 @@ import com.example.oauth.member.domain.Member;
 import com.example.oauth.member.domain.SocialType;
 import com.example.oauth.member.dto.*;
 import com.example.oauth.member.service.GoogleService;
+import com.example.oauth.member.service.KakaoService;
 import com.example.oauth.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ public class MemberController {
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
     private final GoogleService googleService;
+    private final KakaoService kakaoService;
 
     @PostMapping("/create")
     public ResponseEntity<?> memberCreate(@RequestBody MemberCreateDto memberCreateDto)  {
@@ -67,4 +69,27 @@ public class MemberController {
 
         return new ResponseEntity<>(loginInfo, HttpStatus.OK);
     }
+
+    @PostMapping("/kakao/doLogin")
+    public ResponseEntity<?> kakaoLogin(@RequestBody RedirectDto redirectDto) {
+
+        AccessTokenDto accessTokenDto = kakaoService.getAccessToken(redirectDto.getCode());
+
+        KakaoProfileDto kakaoProfileDto = kakaoService.getKakaoProfile(accessTokenDto.getAccess_token());
+
+        Member originalMember = memberService.getMemberBySocialId(kakaoProfileDto.getId());
+        if(originalMember == null) {
+            originalMember = memberService.createOauth(kakaoProfileDto.getId(), kakaoProfileDto.getKakao_account().getEmail(), SocialType.KAKAO);
+        }
+
+
+        String jwtToken = jwtTokenProvider.createToken(originalMember.getEmail(), originalMember.getRole().toString());
+
+        Map<String, Object> loginInfo = new HashMap<>();
+        loginInfo.put("id", originalMember.getId());
+        loginInfo.put("token", jwtToken);
+
+        return new ResponseEntity<>(loginInfo, HttpStatus.OK);
+    }
 }
+
