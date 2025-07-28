@@ -21,11 +21,11 @@ public class MemberCreateDto {
     @Size(min = 8, message = "비밀번호가 너무 짧습니다.")
     private String password;
 
-    public Member toEntity() {
+    public Member toEntity(String encodedPassword) {
         return Member.builder()
                 .name(this.name)
                 .email(this.email)
-                .password(this.password)
+                .password(encodedPassword)
                 .build();
     }
 }

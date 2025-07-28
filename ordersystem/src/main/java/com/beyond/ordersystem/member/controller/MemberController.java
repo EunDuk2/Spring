@@ -20,8 +20,8 @@ public class MemberController {
 
     @PostMapping("/create")
     public ResponseEntity<?> memberCreate(@RequestBody @Valid MemberCreateDto dto) {
-        memberService.save(dto);
-        return new ResponseEntity<>(new CommonSuccessDto(dto.getEmail(), HttpStatus.CREATED.value(), "회원가입 성공"), HttpStatus.CREATED);
+        Long id = memberService.save(dto);
+        return new ResponseEntity<>(new CommonSuccessDto(id, HttpStatus.CREATED.value(), "회원가입 성공"), HttpStatus.CREATED);
     }
 
 }
