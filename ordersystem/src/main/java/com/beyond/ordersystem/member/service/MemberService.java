@@ -51,4 +51,12 @@ public class MemberService {
         return MemberResDto.fromEntity(member);
     }
 
+    public Long memberDelete() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+        member.setDelYn("Y");
+        return member.getId();
+    }
 }

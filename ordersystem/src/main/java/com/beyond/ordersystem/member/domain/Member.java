@@ -1,10 +1,7 @@
 package com.beyond.ordersystem.member.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -23,6 +20,7 @@ public class Member {
     private String password;
     @Column(nullable = false)
     @Builder.Default
+    @Setter
     private String delYn = "N";
     @Column(nullable = false)
     @Builder.Default

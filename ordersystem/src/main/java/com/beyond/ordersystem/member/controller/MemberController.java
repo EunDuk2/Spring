@@ -49,4 +49,11 @@ public class MemberController {
         MemberResDto memberResDto = memberService.findMyInfo();
         return new ResponseEntity<>(new CommonSuccessDto(memberResDto, HttpStatus.OK.value(), "마이페이지 조회 성공"), HttpStatus.OK);
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> memberDelete() {
+        Long deleteMemberId = memberService.memberDelete();
+        return new ResponseEntity<>(new CommonSuccessDto(deleteMemberId, HttpStatus.OK.value(), "회원탈퇴 성공"), HttpStatus.OK);
+    }
+
 }
