@@ -6,15 +6,16 @@ import com.beyond.ordersystem.member.domain.Member;
 import com.beyond.ordersystem.member.dto.LoginReqDto;
 import com.beyond.ordersystem.member.dto.LoginResDto;
 import com.beyond.ordersystem.member.dto.MemberCreateDto;
+import com.beyond.ordersystem.member.dto.MemberResDto;
 import com.beyond.ordersystem.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,4 +37,10 @@ public class MemberController {
         return new ResponseEntity<>(new CommonSuccessDto(new LoginResDto(accessToken, "refreshToken"), HttpStatus.OK.value(), "로그인 성공"), HttpStatus.OK);
     }
 
+    @GetMapping("/list")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> memberList() {
+        List<MemberResDto> memberList = memberService.findAll();
+        return new ResponseEntity<>(new CommonSuccessDto(memberList, HttpStatus.OK.value(), "사용자 목록 조회 성공"), HttpStatus.OK);
+    }
 }

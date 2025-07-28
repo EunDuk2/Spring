@@ -26,5 +26,6 @@ public class Member {
     private String delYn = "N";
     @Column(nullable = false)
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 }
