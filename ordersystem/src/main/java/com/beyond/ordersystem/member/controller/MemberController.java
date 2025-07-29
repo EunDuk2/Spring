@@ -3,10 +3,7 @@ package com.beyond.ordersystem.member.controller;
 import com.beyond.ordersystem.common.auth.JwtTokenProvider;
 import com.beyond.ordersystem.common.dto.CommonSuccessDto;
 import com.beyond.ordersystem.member.domain.Member;
-import com.beyond.ordersystem.member.dto.LoginReqDto;
-import com.beyond.ordersystem.member.dto.LoginResDto;
-import com.beyond.ordersystem.member.dto.MemberCreateDto;
-import com.beyond.ordersystem.member.dto.MemberResDto;
+import com.beyond.ordersystem.member.dto.*;
 import com.beyond.ordersystem.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +30,23 @@ public class MemberController {
     @PostMapping("/doLogin")
     public ResponseEntity<?> memberDoLogin(@RequestBody @Valid LoginReqDto dto) {
         Member member = memberService.doLogin(dto);
+        // at 토큰 생성
         String accessToken = jwtTokenProvider.createAtToken(member);
-        return new ResponseEntity<>(new CommonSuccessDto(new LoginResDto(accessToken, "refreshToken"), HttpStatus.OK.value(), "로그인 성공"), HttpStatus.OK);
+        // rt 토큰 생성
+        String refreshToken = jwtTokenProvider.createRtToken(member);
+        return new ResponseEntity<>(new CommonSuccessDto(new LoginResDto(accessToken, refreshToken), HttpStatus.OK.value(), "로그인 성공"), HttpStatus.OK);
+    }
+
+    // rt를 통한 at 갱신 요청
+    @PostMapping("/refresh-at")
+    public ResponseEntity<?> generateNewAt(@RequestBody RefreshTokenDto dto) {
+        // rt 검증 로직
+        Member member = jwtTokenProvider.validateRt(dto.getRefreshToken());
+
+        // at 신규 생성 로직
+        String accessToken = jwtTokenProvider.createAtToken(member);
+
+        return new ResponseEntity<>(new CommonSuccessDto(new LoginResDto(accessToken, null), HttpStatus.OK.value(), "at 재발급 성공"), HttpStatus.OK);
     }
 
     @GetMapping("/list")
