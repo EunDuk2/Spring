@@ -26,4 +26,6 @@ public class Product extends BaseTimeEntity {
     @JoinColumn(name = "member_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
+    @Setter
+    private String productImgae;
 }

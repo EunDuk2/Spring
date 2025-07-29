@@ -8,11 +8,17 @@ import com.beyond.ordersystem.product.dto.ProductResDto;
 import com.beyond.ordersystem.product.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -21,6 +27,10 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
     private final MemberRepository memberRepository;
+    private final S3Client s3Client;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     // 상품 등록
     public Long createProduct(ProductCreateDto dto) {
@@ -30,6 +40,37 @@ public class ProductService {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("없는 사용자입니다."));
 
         Product product = productRepository.save(dto.toEntity(member));
+
+        // 이미지 파일 s3에 올리고 url 가져오기
+        MultipartFile profileImage = dto.getProductImage();
+        if(!profileImage.isEmpty()) {
+            // 이미지명 설정
+            String fileName = "[ORDER SYSTEM] user-"+member.getId()+"-profileImage-"+profileImage.getOriginalFilename();
+
+            // 저장 객체 구성
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(fileName)
+                    .contentType(profileImage.getContentType()) // image/jpeg ...
+                    .build();
+
+            // 이미지를 업로드 (byte 형태로)
+            try {
+                s3Client.putObject(putObjectRequest, RequestBody.fromBytes(profileImage.getBytes()));
+            } catch (IOException e) {
+                // checked -> unchecked로 바꿔 전체 rollback 되도록 예외처리
+                throw new IllegalArgumentException("이미지 업로드 실패");
+            }
+            // image Url 추출
+            String imgUrl = s3Client.utilities()
+                    .getUrl(a -> a.bucket(bucket).key(fileName)) // ← key 추가
+                    .toExternalForm(); // ToDo - 예외처리 필요
+
+
+            product.setProductImgae(imgUrl);
+        }
+
+
         return product.getId();
     }
 

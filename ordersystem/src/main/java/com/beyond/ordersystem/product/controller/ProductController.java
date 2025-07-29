@@ -25,13 +25,11 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createProduct(@ModelAttribute @Valid ProductCreateDto dto) {
         Long id = productService.createProduct(dto);
-
         return new ResponseEntity<>(new CommonSuccessDto(id, HttpStatus.CREATED.value(), "상품등록 성공"), HttpStatus.CREATED);
     }
 
     // 상품목록 조회
     @GetMapping("/list")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getProductList() {
         List<ProductResDto> productList = productService.getProductList();
         return new ResponseEntity<>(new CommonSuccessDto(productList, HttpStatus.OK.value(), "상풍목록 조회 성공"), HttpStatus.OK);
