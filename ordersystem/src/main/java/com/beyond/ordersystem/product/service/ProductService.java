@@ -5,10 +5,14 @@ import com.beyond.ordersystem.member.repository.MemberRepository;
 import com.beyond.ordersystem.product.domain.Product;
 import com.beyond.ordersystem.product.dto.ProductCreateDto;
 import com.beyond.ordersystem.product.dto.ProductResDto;
+import com.beyond.ordersystem.product.dto.ProductSearchDto;
 import com.beyond.ordersystem.product.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -75,9 +79,12 @@ public class ProductService {
     }
 
     // 상품목록 조회
-    public List<ProductResDto> getProductList() {
-        List<ProductResDto> productList =  productRepository.findAll().stream().map(a -> ProductResDto.fromEntity(a)).toList();
-        return productList;
+    public Page<ProductResDto> getProductList(Pageable pageable, ProductSearchDto dto) {
+        Specification specification = ProductSpecification.search(dto);
+
+        Page<Product> productPages = productRepository.findAll(specification, pageable);
+
+        return productPages.map(a -> ProductResDto.fromEntity(a));
     }
 
     // 상품상세 조회
