@@ -95,7 +95,7 @@ public class JwtTokenProvider {
                 .compact();
 
         // rt 토큰을 redis에 저장 : key-value 형식으로 set
-        redisTemplate.opsForValue().set(member.getEmail(), refreshToken);
+//        redisTemplate.opsForValue().set(member.getEmail(), refreshToken);
         redisTemplate.opsForValue().set(member.getEmail(), refreshToken, 200, TimeUnit.DAYS); // 200일 ttl
 
 
@@ -105,7 +105,7 @@ public class JwtTokenProvider {
     public Member validateRt(String refreshToken) {
         // rt 그 자체를 검증
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKeyRt)
+                .setSigningKey(secret_rt_key)
                 .build()
                 .parseClaimsJws(refreshToken)
                 .getBody();

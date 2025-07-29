@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ProductSearchDto {
     private String category;
-    private String name;
+    private String productName;
 }

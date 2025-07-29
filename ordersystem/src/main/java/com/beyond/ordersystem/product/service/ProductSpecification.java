@@ -13,11 +13,11 @@ public class ProductSpecification {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicateList = new ArrayList<>();
 //                predicateList.add(criteriaBuilder.equal(root.get("delYn"), "N"));
-            if(dto.getName() != null) {
-                predicateList.add(criteriaBuilder.like(root.get("name"), "%"+dto.getName()+"%"));
+            if(dto.getProductName() != null) {
+                predicateList.add(criteriaBuilder.like(root.get("name"), "%"+dto.getProductName()+"%"));
             }
             if(dto.getCategory() != null) {
-                predicateList.add(criteriaBuilder.like(root.get("category"), "%"+dto.getCategory()+"%"));
+                predicateList.add(criteriaBuilder.equal(root.get("category"), dto.getCategory()));
             }
 
             Predicate[] predicateArr = new Predicate[predicateList.size()];

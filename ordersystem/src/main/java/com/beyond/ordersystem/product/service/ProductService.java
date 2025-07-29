@@ -49,7 +49,7 @@ public class ProductService {
         MultipartFile profileImage = dto.getProductImage();
         if(!profileImage.isEmpty()) {
             // 이미지명 설정
-            String fileName = "[ORDER SYSTEM] user-"+member.getId()+"-profileImage-"+profileImage.getOriginalFilename();
+            String fileName = "[ORDER SYSTEM] product-"+product.getId()+"-productImage-"+profileImage.getOriginalFilename();
 
             // 저장 객체 구성
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
