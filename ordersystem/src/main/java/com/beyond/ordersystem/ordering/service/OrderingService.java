@@ -6,6 +6,8 @@ import com.beyond.ordersystem.ordering.domain.OrderDetail;
 import com.beyond.ordersystem.ordering.domain.OrderStatus;
 import com.beyond.ordersystem.ordering.domain.Ordering;
 import com.beyond.ordersystem.ordering.dto.OrderCreateDto;
+import com.beyond.ordersystem.ordering.dto.OrderDetailDto;
+import com.beyond.ordersystem.ordering.dto.OrderListResDto;
 import com.beyond.ordersystem.ordering.repository.OrderingDetailRepository;
 import com.beyond.ordersystem.ordering.repository.OrderingRepository;
 import com.beyond.ordersystem.product.domain.Product;
@@ -17,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -49,13 +52,34 @@ public class OrderingService {
             ordering.getOrderDetailList().add(orderDetail);
 
             // 재고 관리
-            boolean check = product.decreaseQuantity(quantity);
+            boolean check = product.decreaseQuantity(quantity); // 조건은 여기서 해결하는게 나을 듯
             if(!check) {
-                throw new IllegalArgumentException("요구 주문수량이 너무 많습니다.");
+                // 모든 임시 저장 사항들을 롤백 처리
+                throw new IllegalArgumentException("재고가 부족합니다.");
             }
         }
 
         return ordering.getId();
     }
 
+    // 주문 목록 조회
+    public List<OrderListResDto> getOrderingList() {
+        List<OrderListResDto> orderListResDtoList = new ArrayList<>();
+        List<Ordering> orderingList = orderingRepository.findAll();
+
+        // Ordering (id, orderStatus), Member(memberEmail)
+        // OrderDetail (detailId, productName, productCount)
+        for(Ordering ordering : orderingList) {
+            List<OrderDetailDto> orderDetailDtoList = new ArrayList<>();
+
+            List<OrderDetail> orderDetailList = orderingDetailRepository.findByOrdering(ordering);
+            for(OrderDetail orderDetail : orderDetailList) {
+                orderDetailDtoList.add(OrderDetailDto.fromEntity(orderDetail));
+            }
+            OrderListResDto orderListResDto = OrderListResDto.fromEntity(ordering, orderDetailDtoList);
+            orderListResDtoList.add(orderListResDto);
+        }
+
+        return orderListResDtoList;
+    }
 }

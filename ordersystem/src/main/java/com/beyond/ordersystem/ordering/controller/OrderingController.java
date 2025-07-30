@@ -2,15 +2,13 @@ package com.beyond.ordersystem.ordering.controller;
 
 import com.beyond.ordersystem.common.dto.CommonSuccessDto;
 import com.beyond.ordersystem.ordering.dto.OrderCreateDto;
+import com.beyond.ordersystem.ordering.dto.OrderListResDto;
 import com.beyond.ordersystem.ordering.service.OrderingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -31,6 +29,14 @@ public class OrderingController {
         return new ResponseEntity<>(new CommonSuccessDto(id, HttpStatus.OK.value(), "주문 성공"), HttpStatus.CREATED);
     }
 
+    // 주문 목록 조회
+    @GetMapping("/list")
+    public ResponseEntity<?> getOrderingList() {
+
+        List<OrderListResDto> orderListResDtoList = orderingService.getOrderingList();
+
+        return new ResponseEntity<>(new CommonSuccessDto(orderListResDtoList, HttpStatus.OK.value(), "주문목록 조회 성공"), HttpStatus.OK);
+    }
 
 
 }
