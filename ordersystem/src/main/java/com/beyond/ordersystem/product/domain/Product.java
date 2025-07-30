@@ -28,4 +28,12 @@ public class Product extends BaseTimeEntity {
     private Member member;
     @Setter
     private String productImgae;
+
+    public void updateProduct(String name, String category, int price, int stockQuantity) {
+        this.name = name;
+        this.category = category;
+        this.price = price;
+        this.stockQuantity = stockQuantity;
+    }
+
 }
