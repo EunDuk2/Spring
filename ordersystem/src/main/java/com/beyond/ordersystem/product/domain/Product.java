@@ -36,4 +36,13 @@ public class Product extends BaseTimeEntity {
         this.stockQuantity = stockQuantity;
     }
 
+    public boolean decreaseQuantity(int count) {
+        if(this.stockQuantity < count) {
+            return false;
+        } else {
+            this.stockQuantity -= count;
+            return true;
+        }
+    }
+
 }
