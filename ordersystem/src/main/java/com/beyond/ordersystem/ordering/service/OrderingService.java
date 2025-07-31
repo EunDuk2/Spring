@@ -82,4 +82,26 @@ public class OrderingService {
 
         return orderListResDtoList;
     }
+
+    // 나의 주문 목록 조회
+    public List<OrderListResDto> getMyOrderingList() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        List<Ordering> orderingList = orderingRepository.findByMemberEmail(email);
+
+        List<OrderListResDto> orderListResDtoList = new ArrayList<>();
+
+        for(Ordering ordering : orderingList) {
+            List<OrderDetailDto> orderDetailDtoList = new ArrayList<>();
+
+            List<OrderDetail> orderDetailList = orderingDetailRepository.findByOrdering(ordering);
+            for(OrderDetail orderDetail : orderDetailList) {
+                orderDetailDtoList.add(OrderDetailDto.fromEntity(orderDetail));
+            }
+            OrderListResDto orderListResDto = OrderListResDto.fromEntity(ordering, orderDetailDtoList);
+            orderListResDtoList.add(orderListResDto);
+        }
+
+        return orderListResDtoList;
+    }
 }

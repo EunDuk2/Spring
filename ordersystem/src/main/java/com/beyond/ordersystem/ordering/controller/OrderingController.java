@@ -38,5 +38,14 @@ public class OrderingController {
         return new ResponseEntity<>(new CommonSuccessDto(orderListResDtoList, HttpStatus.OK.value(), "주문목록 조회 성공"), HttpStatus.OK);
     }
 
+    // 나의 주문 목록 조회
+    @GetMapping("/myorders")
+    public ResponseEntity<?> getMyOrderingList() {
+
+        List<OrderListResDto> orderListResDtoList = orderingService.getMyOrderingList();
+
+        return new ResponseEntity<>(new CommonSuccessDto(orderListResDtoList, HttpStatus.OK.value(), "나의 주문목록 조회 성공"), HttpStatus.OK);
+    }
+
 
 }
