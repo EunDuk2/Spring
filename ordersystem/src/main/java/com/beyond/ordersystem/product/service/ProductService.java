@@ -1,5 +1,6 @@
 package com.beyond.ordersystem.product.service;
 
+import com.beyond.ordersystem.common.service.StockInventoryService;
 import com.beyond.ordersystem.member.domain.Member;
 import com.beyond.ordersystem.member.repository.MemberRepository;
 import com.beyond.ordersystem.product.domain.Product;
@@ -37,6 +38,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final MemberRepository memberRepository;
     private final S3Client s3Client;
+    private final StockInventoryService stockInventoryService;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -82,7 +84,8 @@ public class ProductService {
             product.setProductImgae(imgUrl);
         }
 
-
+        // 상품등록 시 redis에 재고 세팅
+        stockInventoryService.makeStockQuantity(product.getId(), product.getStockQuantity());
         return product.getId();
     }
 

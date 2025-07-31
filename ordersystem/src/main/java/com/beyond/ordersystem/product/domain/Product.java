@@ -22,6 +22,7 @@ public class Product extends BaseTimeEntity {
     @Column(nullable = false)
     private int price;
     @Column(nullable = false)
+    @Setter
     private int stockQuantity;
     @JoinColumn(name = "member_id")
     @ManyToOne(fetch = FetchType.LAZY)
