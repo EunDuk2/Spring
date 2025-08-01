@@ -103,6 +103,7 @@ public class RedisConfig {
         container.setConnectionFactory(redisConnectionFactory);
         // 아래 채널에서 오는 메시지를 해당 객체로 낚아채겠다?
         container.addMessageListener(messageListenerAdapter, new PatternTopic("order-channel"));
+        // 만약에 여러 채널을 구독해야 하는 경우, 여러 개의 PatternTopic을 add하거나, 별도의 Bean 객체 생성.
 
         return container;
     }

@@ -59,12 +59,24 @@ public class SseAlarmService implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         // Message : 실질적인 메시지가 담겨있는 객체
         // pattern은 채널명이다.
+        String channel_name = new String(pattern);
+        // 여러 개의 채널을 구독하고 있을 경우, 채널명으로 분기처리
+
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             SseMessageDto dto = objectMapper.readValue(message.getBody(), SseMessageDto.class);
-            String channel_name = new String(pattern);
-            System.out.println("dto: " + dto);
-            System.out.println("pattern: " + channel_name);
+
+            SseEmitter sseEmitter = sseEmitterRegistry.getEmitter(dto.getReceiver());
+            // emitter객체가 현재 서버에 있으면, 직접 알림 발송. 그렇지 않으면, redis에 publish
+            if(sseEmitter != null) {
+                try {
+                    sseEmitter.send(SseEmitter.event().name("ordered").data(dto));
+                    // 사용자가 로그아웃(새로고침)후에 다시 화면에 들어왔을 때, 알림 메시지가 남아있으려면 DB에 추가적인 저장 필요
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
