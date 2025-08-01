@@ -32,8 +32,8 @@ public class StockInventoryService {
     }
 
     // 주문 취소 시, 재고수량 증가
-    public void increaseStockQuantity() {
-
+    public void increaseStockQuantity(Long productId, int orderQuantity) {
+        redisTemplate.opsForValue().increment(String.valueOf(productId), orderQuantity);
     }
 
 }

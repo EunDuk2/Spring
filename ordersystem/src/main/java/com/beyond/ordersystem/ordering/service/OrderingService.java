@@ -88,12 +88,6 @@ public class OrderingService {
 
             ordering.getOrderDetailList().add(orderDetail);
 
-//            boolean check = product.decreaseQuantity(quantity);
-//            if(!check) {
-//                // 모든 임시 저장 사항들을 롤백 처리
-//                throw new IllegalArgumentException("재고가 부족합니다.");
-//            }
-
             // redis에서 재고수량 확인 및 재고수량 감소처리
             int newQuantity =  stockInventoryService.decreaseStockQuantity(product.getId(), dto.getProductCount());
             if(newQuantity < 0) {
@@ -148,4 +142,27 @@ public class OrderingService {
 
         return orderListResDtoList;
     }
+
+    // 주문 취소
+    public Ordering cancel(Long id) {
+        // Ordering의 DB 상태값 변경
+        Ordering ordering = orderingRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("없는 주문입니다."));
+        ordering.setOrderStatus(OrderStatus.CANCELED);
+
+        for(OrderDetail orderDetail : ordering.getOrderDetailList()) {
+            Long productId = orderDetail.getProduct().getId();
+            int quantity = orderDetail.getQuantity();
+
+            // Redis의 재고값 증가
+            stockInventoryService.increaseStockQuantity(productId, quantity);
+
+            // rabbitmq에 재고 증가 메시지 발행 -> 굳이 필요없을 것으로 보임
+            // 바로 RDB에 재고 업데이트
+            Product product = productRepository.findById(productId).orElseThrow(() -> new EntityNotFoundException("없는 상품입니다."));
+            product.increaseQuantity(quantity);
+        }
+
+        return ordering;
+    }
+
 }

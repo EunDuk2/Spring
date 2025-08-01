@@ -3,10 +3,7 @@ package com.beyond.ordersystem.ordering.domain;
 import com.beyond.ordersystem.common.domain.BaseTimeEntity;
 import com.beyond.ordersystem.member.domain.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +20,7 @@ public class Ordering extends BaseTimeEntity {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Setter
     private OrderStatus orderStatus = OrderStatus.ORDERED;
     @JoinColumn(name = "member_id")
     @ManyToOne(fetch = FetchType.LAZY)

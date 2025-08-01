@@ -46,4 +46,8 @@ public class Product extends BaseTimeEntity {
         }
     }
 
+    public void increaseQuantity(int orderQuantity) {
+        this.stockQuantity += orderQuantity;
+    }
+
 }
