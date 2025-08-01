@@ -1,5 +1,6 @@
 package com.beyond.ordersystem.ordering.service;
 
+import com.beyond.ordersystem.common.service.SseAlarmService;
 import com.beyond.ordersystem.common.service.StockInventoryService;
 import com.beyond.ordersystem.common.service.StockRabbitMqService;
 import com.beyond.ordersystem.member.domain.Member;
@@ -35,6 +36,7 @@ public class OrderingService {
     private final OrderingDetailRepository orderingDetailRepository;
     private final StockInventoryService stockInventoryService;
     private final StockRabbitMqService stockRabbitMqService;
+    private final SseAlarmService sseAlarmService;
 
     // 주문 생성
 //    @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -96,6 +98,10 @@ public class OrderingService {
             // rdb에 사후 update를 위한 메시지 발행 (비동기처리)
             stockRabbitMqService.publish(dto.getProductId(), dto.getProductCount());
         }
+
+        // 주문성공 시 admin 유저에게 알림메시지 전송
+        sseAlarmService.publishMessage("admin@naver.com", email, ordering.getId());
+
 
         return ordering.getId();
     }

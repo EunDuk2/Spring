@@ -41,7 +41,7 @@ public class ProductController {
         return new ResponseEntity<>(new CommonSuccessDto(productList, HttpStatus.OK.value(), "상풍목록 조회 성공"), HttpStatus.OK);
     }
 
-    // 상품상세 조회
+    // 상품상세 조회 (-> 캐싱처리 고려)
     @GetMapping("/detail/{inputId}")
     public ResponseEntity<?> getProductDetail(@PathVariable Long inputId) {
         ProductResDto productResDto = productService.getProductDetail(inputId);
