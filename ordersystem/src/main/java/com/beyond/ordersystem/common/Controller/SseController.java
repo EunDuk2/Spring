@@ -1,6 +1,7 @@
 package com.beyond.ordersystem.common.Controller;
 
 import com.beyond.ordersystem.common.service.SseAlarmService;
+import com.beyond.ordersystem.common.service.SseEmitterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,19 +16,25 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @RequestMapping("/sse")
 public class SseController {
-    private final SseAlarmService sseAlarmService;
+    private final SseEmitterRegistry sseEmitterRegistry;
 
     @GetMapping("/connect")
     public SseEmitter subscribe() {
         SseEmitter sseEmitter = new SseEmitter(14400*60*1000L); // 10일정도 emitter 유효기간 설정
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        sseAlarmService.addSseEmitter(email, sseEmitter);
+        sseEmitterRegistry.addSseEmitter(email, sseEmitter);
         try {
             sseEmitter.send(SseEmitter.event().name("connect").data("연결완료"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return sseEmitter;
+    }
+
+    @GetMapping("/disconnect")
+    public void unSubscribe() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        sseEmitterRegistry.removeSseEmitter(email);
     }
 }

@@ -41,6 +41,19 @@ public class RedisConfig {
         return new LettuceConnectionFactory(configuration);
     }
 
+    // Redis Pub/Sub을 위한 연결 객체 생성
+    @Bean
+    @Qualifier("ssePubSub")
+    public RedisConnectionFactory sseFactory() {
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+        configuration.setHostName(host);
+        configuration.setPort(port);
+
+        // redis pub/sub 기능은 db에 값을 저장하는 기능이 아니므로, 특정 DB에 의존적이지 않음
+
+        return new LettuceConnectionFactory(configuration);
+    }
+
     @Bean
     @Qualifier("rtInventory")
     // Bean들끼리 서로 의존성을 주입받을 때, 메서드 파라미터로도 주입 가능
@@ -62,4 +75,18 @@ public class RedisConfig {
         redisTemplate.setConnectionFactory(stockConnectionFactory);
         return redisTemplate;
     }
+
+    @Bean
+    @Qualifier("ssePubSub")
+    public RedisTemplate<String, String> sseRedisTemplate(@Qualifier("ssePubSub") RedisConnectionFactory stockConnectionFactory) {
+        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setConnectionFactory(stockConnectionFactory);
+        return redisTemplate;
+    }
+
+    // redis 리스너 객체
+
+
 }

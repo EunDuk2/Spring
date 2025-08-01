@@ -3,18 +3,15 @@ package com.beyond.ordersystem.common.service;
 import com.beyond.ordersystem.common.dto.SseMessageDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 @Component
+@RequiredArgsConstructor
 public class SseAlarmService {
-    // SseEmitter 연결된 사용자 정보(ip, mac address 정보 등)를 의미
-    private Map<String, SseEmitter> emitterMap = new HashMap<>();
-
+    private final SseEmitterRegistry sseEmitterRegistry;
 
     // 특정 사용자에게 message 발송
     // productId를 커스텀 할 수 있음
@@ -34,16 +31,14 @@ public class SseAlarmService {
         }
 
         // emitter 객체를 통해 메시지 전송
-        SseEmitter sseEmitter = emitterMap.get(receiver);
+        SseEmitter sseEmitter = sseEmitterRegistry.getEmitter(receiver);
         try {
             sseEmitter.send(SseEmitter.event().name("ordered").data(data));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
-    }
-    public void addSseEmitter(String email, SseEmitter sseEmitter) {
-        emitterMap.put(email, sseEmitter);
-        System.out.println("eunsung111: " + emitterMap);
-    }
 
+        // 사용자가 로그아웃(새로고침)후에 다시 화면에 들어왔을 때, 알림 메시지가 남아있으려면 DB에 추가적인 저장 필요
+
+    }
 }
