@@ -5,6 +5,7 @@ import com.beyond.board.author.service.AuthorService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,11 +16,17 @@ import java.util.List;
 public class AuthorController {
     private final AuthorService authorService;
 
-    // 회원가입
+    // 회원가입 화면 반환
+    @GetMapping("/create")
+    public String createScreen() {
+        return "author/author_register";
+    }
+
+    // 회원가입 요청 응답
     @PostMapping("/create")
     public String save(@Valid AuthorCreateDto authorCreateDto) {
         this.authorService.save(authorCreateDto);
-        return null;
+        return "redirect:/";
     }
 
     // 로그인
@@ -27,16 +34,18 @@ public class AuthorController {
 
     // 회원 목록 조회
     @GetMapping("/list")
-    public String listAuthors() {
+    public String listAuthors(Model model) {
         List<AuthorListDto> authorListDto = this.authorService.findAll();
+        model.addAttribute("authorList", authorListDto);
         return "author/author_list";
     }
 
     // 회원 상세 조회
     @GetMapping("/detail/{inputId}")
-    public String findById(@PathVariable Long inputId) {
+    public String findById(@PathVariable Long inputId, Model model) {
         AuthorDetailDto authorDetailDto = authorService.findById(inputId);
-        return null;
+        model.addAttribute("authorDetail", authorDetailDto);
+        return "author/author_detail";
     }
 
 //    // 비밀번호 수정

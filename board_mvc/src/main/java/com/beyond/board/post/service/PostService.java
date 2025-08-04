@@ -27,10 +27,10 @@ public class PostService {
     private final AuthorRepository authorRepository;
 
     public void save(PostCreateDto dto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
 
-        Author author = authorRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("없는 사용자 입니다."));
+        Author author = authorRepository.findByEmail("admin@naver.com").orElseThrow(() -> new EntityNotFoundException("없는 사용자 입니다."));
 
         LocalDateTime appointmentTime = null;
         if(dto.getAppointment().equals("Y")) {
