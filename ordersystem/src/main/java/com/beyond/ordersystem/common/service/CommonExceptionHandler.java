@@ -1,6 +1,7 @@
 package com.beyond.ordersystem.common.service;
 
 import com.beyond.ordersystem.common.dto.CommonErrorDto;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.MappedSuperclass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @Slf4j
-@ControllerAdvice
+@ControllerAdvice // RestControllerAdvice?
+@Hidden // Swagger에서 제외
 public class CommonExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> illegalArgumentException(IllegalArgumentException e) {
