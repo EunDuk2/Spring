@@ -18,6 +18,12 @@
             <li class="nav-item">
                 <a href="/author/create" class="nav-link">회원가입</a>
             </li>
+            <li class="nav-item" th:if="${session.email == null}">
+                <a href="/author/login" class="nav-link">로그인</a>
+            </li>
+            <li class="nav-item" th:if="${session.email != null}">
+                <a href="/doLogout" class="nav-link">로그아웃</a>
+            </li>
         </ul>
     </nav>
 </div>

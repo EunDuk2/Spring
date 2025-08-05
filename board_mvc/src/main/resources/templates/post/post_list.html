@@ -29,6 +29,11 @@
                 </tr>
             </tbody>
         </table>
+        <ul class="pagination justify-content-center" th:if="${postList.totalPages > 0}">
+            <li class="page-item" th:each="pageNum : ${#numbers.sequence(0,postList.totalPages-1)}">
+                <a class="page-link" th:href="@{/post/list/(page=${pageNum})}" th:text="${pageNum+1}"></a>
+            </li>
+        </ul>
     </div>
 </body>
 </html>

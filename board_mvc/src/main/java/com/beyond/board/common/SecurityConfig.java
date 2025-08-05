@@ -21,6 +21,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 @EnableMethodSecurity // PreAuthorized 를 미리 다 가져온다. (컨트롤러 딴에서 처리하는게 아님)
 public class SecurityConfig {
+    private final LoginSuccessHandler loginSuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -28,10 +29,19 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .authorizeRequests().antMatchers("/**").permitAll().anyRequest().authenticated()
+                .authorizeRequests().antMatchers("/", "/author/create", "/author/login").permitAll().anyRequest().authenticated()
+                .and()
+                .formLogin()
+                    .loginPage("/author/login")
+                    // 사전에 구현되어 있는 doLogin 메서드 그대로 사용
+                    .loginProcessingUrl("/doLogin")
+                    .usernameParameter("email")
+                    .successHandler(loginSuccessHandler)
+                .passwordParameter("password")
+                .and()
+                .logout().logoutUrl("/doLogout")
                 .and()
                 .build();
-//        /author/create", "/author/doLogin
     }
 
     @Bean

@@ -22,6 +22,11 @@ public class AuthorController {
         return "author/author_register";
     }
 
+    @GetMapping("/login")
+    public String loginScreen() {
+        return "author/author_login";
+    }
+
     // 회원가입 요청 응답
     @PostMapping("/create")
     public String save(@Valid AuthorCreateDto authorCreateDto) {
