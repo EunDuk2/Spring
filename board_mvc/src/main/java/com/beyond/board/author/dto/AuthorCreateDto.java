@@ -5,12 +5,14 @@ import com.beyond.board.author.domain.Role;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Builder
 public class AuthorCreateDto {
     @NotEmpty(message = "이름은 필수 입력 항목입니다.")
     private String name;
