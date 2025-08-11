@@ -43,6 +43,12 @@ public class MemberService {
         return memberResDtoList;
     }
 
+    public MemberResDto memberDetail(Long id) {
+        Member member = memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+        MemberResDto dto = MemberResDto.fromEntity(member);
+        return dto;
+    }
+
     public MemberResDto findMyInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();

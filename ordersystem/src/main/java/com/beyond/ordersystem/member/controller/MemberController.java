@@ -56,6 +56,13 @@ public class MemberController {
         return new ResponseEntity<>(new CommonSuccessDto(memberList, HttpStatus.OK.value(), "사용자 목록 조회 성공"), HttpStatus.OK);
     }
 
+    @GetMapping("/detail/{inputId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> memberDetail(@PathVariable Long inputId) {
+        MemberResDto dto = memberService.memberDetail(inputId);
+        return new ResponseEntity<>(new CommonSuccessDto(dto, HttpStatus.OK.value(), "사용자 상세 조회 성공"), HttpStatus.OK);
+    }
+
     @GetMapping("/myInfo")
     public ResponseEntity<?> memberMyInfo() {
         MemberResDto memberResDto = memberService.findMyInfo();
