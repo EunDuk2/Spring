@@ -35,17 +35,6 @@ public class RedisConfig {
         return new LettuceConnectionFactory(configuration);
     }
 
-    @Bean
-    @Qualifier("stockInventory")
-    public RedisConnectionFactory stockConnectionFactory() {
-        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(host);
-        configuration.setPort(port);
-        configuration.setDatabase(1);
-
-        return new LettuceConnectionFactory(configuration);
-    }
-
     // Redis Pub/Sub을 위한 연결 객체 생성
     @Bean
     @Qualifier("ssePubSub")
@@ -68,16 +57,6 @@ public class RedisConfig {
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new StringRedisSerializer());
         redisTemplate.setConnectionFactory(redisConnectionFactory); // Factory 객체 연결
-        return redisTemplate;
-    }
-
-    @Bean
-    @Qualifier("stockInventory")
-    public RedisTemplate<String, String> stockTemplate(@Qualifier("stockInventory") RedisConnectionFactory stockConnectionFactory) {
-        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
-        redisTemplate.setConnectionFactory(stockConnectionFactory);
         return redisTemplate;
     }
 

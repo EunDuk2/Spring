@@ -26,7 +26,7 @@ public class OrderingController {
     @PostMapping("/create")
     public ResponseEntity<?> createOrdering(@RequestBody @Valid List<OrderCreateDto> dto) {
 
-        Long id = orderingService.createConcurrent(dto);
+        Long id = orderingService.createOrdering(dto);
 
         return new ResponseEntity<>(new CommonSuccessDto(id, HttpStatus.OK.value(), "주문 성공"), HttpStatus.CREATED);
     }

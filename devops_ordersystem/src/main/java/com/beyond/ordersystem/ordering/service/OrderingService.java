@@ -1,8 +1,7 @@
 package com.beyond.ordersystem.ordering.service;
 
 import com.beyond.ordersystem.common.service.SseAlarmService;
-import com.beyond.ordersystem.common.service.StockInventoryService;
-import com.beyond.ordersystem.common.service.StockRabbitMqService;
+//import com.beyond.ordersystem.common.service.StockRabbitMqService;
 import com.beyond.ordersystem.member.domain.Member;
 import com.beyond.ordersystem.member.repository.MemberRepository;
 import com.beyond.ordersystem.ordering.domain.OrderDetail;
@@ -20,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -34,8 +32,6 @@ public class OrderingService {
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
     private final OrderingDetailRepository orderingDetailRepository;
-    private final StockInventoryService stockInventoryService;
-    private final StockRabbitMqService stockRabbitMqService;
     private final SseAlarmService sseAlarmService;
 
     // 주문 생성
@@ -70,38 +66,8 @@ public class OrderingService {
             }
         }
 
-        return ordering.getId();
-    }
-
-    @Transactional(isolation = Isolation.READ_COMMITTED) // 격리 레벨을 낮춤으로서, 성능향상과 lock 관련 문제 원천 차단
-    // 주문 생성 (동시성 처리)
-    public Long createConcurrent(List<OrderCreateDto> dtos) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("없는 사용자입니다."));
-
-        Ordering ordering = Ordering.builder().orderStatus(OrderStatus.ORDERED).member(member).build();
-        orderingRepository.save(ordering);
-
-        for(OrderCreateDto dto : dtos) {
-            Product product = productRepository.findById(dto.getProductId()).orElseThrow(() -> new EntityNotFoundException("없는 상품입니다."));
-            int quantity = dto.getProductCount();
-            OrderDetail orderDetail = OrderDetail.builder().product(product).quantity(quantity).ordering(ordering).build();
-
-            ordering.getOrderDetailList().add(orderDetail);
-
-            // redis에서 재고수량 확인 및 재고수량 감소처리
-            int newQuantity =  stockInventoryService.decreaseStockQuantity(product.getId(), dto.getProductCount());
-            if(newQuantity < 0) {
-                throw new IllegalArgumentException("재고 부족");
-            }
-            // rdb에 사후 update를 위한 메시지 발행 (비동기처리)
-            stockRabbitMqService.publish(dto.getProductId(), dto.getProductCount());
-        }
-
         // 주문성공 시 admin 유저에게 알림메시지 전송
         sseAlarmService.publishMessage("admin@naver.com", email, ordering.getId());
-
 
         return ordering.getId();
     }
@@ -158,9 +124,6 @@ public class OrderingService {
         for(OrderDetail orderDetail : ordering.getOrderDetailList()) {
             Long productId = orderDetail.getProduct().getId();
             int quantity = orderDetail.getQuantity();
-
-            // Redis의 재고값 증가
-            stockInventoryService.increaseStockQuantity(productId, quantity);
 
             // rabbitmq에 재고 증가 메시지 발행 -> 굳이 필요없을 것으로 보임
             // 바로 RDB에 재고 업데이트
