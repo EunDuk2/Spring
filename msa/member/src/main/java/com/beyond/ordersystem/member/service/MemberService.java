@@ -7,8 +7,6 @@ import com.beyond.ordersystem.member.dto.MemberResDto;
 import com.beyond.ordersystem.member.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,18 +47,12 @@ public class MemberService {
         return dto;
     }
 
-    public MemberResDto findMyInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
+    public MemberResDto findMyInfo(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
         return MemberResDto.fromEntity(member);
     }
 
-    public Long memberDelete() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
+    public Long memberDelete(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
         member.setDelYn("Y");
         return member.getId();

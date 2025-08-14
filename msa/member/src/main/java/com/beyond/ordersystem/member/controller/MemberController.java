@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,28 +49,26 @@ public class MemberController {
     }
 
     @GetMapping("/list")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> memberList() {
         List<MemberResDto> memberList = memberService.findAll();
         return new ResponseEntity<>(new CommonSuccessDto(memberList, HttpStatus.OK.value(), "사용자 목록 조회 성공"), HttpStatus.OK);
     }
 
     @GetMapping("/detail/{inputId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> memberDetail(@PathVariable Long inputId) {
         MemberResDto dto = memberService.memberDetail(inputId);
         return new ResponseEntity<>(new CommonSuccessDto(dto, HttpStatus.OK.value(), "사용자 상세 조회 성공"), HttpStatus.OK);
     }
 
     @GetMapping("/myInfo")
-    public ResponseEntity<?> memberMyInfo() {
-        MemberResDto memberResDto = memberService.findMyInfo();
+    public ResponseEntity<?> memberMyInfo(@RequestHeader("X-User-Email") String email) {
+        MemberResDto memberResDto = memberService.findMyInfo(email);
         return new ResponseEntity<>(new CommonSuccessDto(memberResDto, HttpStatus.OK.value(), "마이페이지 조회 성공"), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> memberDelete() {
-        Long deleteMemberId = memberService.memberDelete();
+    public ResponseEntity<?> memberDelete(@RequestHeader("X-User-Email") String email) {
+        Long deleteMemberId = memberService.memberDelete(email);
         return new ResponseEntity<>(new CommonSuccessDto(deleteMemberId, HttpStatus.OK.value(), "회원탈퇴 성공"), HttpStatus.OK);
     }
 
