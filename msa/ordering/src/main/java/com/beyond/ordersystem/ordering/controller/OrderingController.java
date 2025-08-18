@@ -20,9 +20,9 @@ public class OrderingController {
 
     // 주문 생성
     @PostMapping("/create")
-    public ResponseEntity<?> createOrdering(@RequestBody @Valid List<OrderCreateDto> dto) {
+    public ResponseEntity<?> createOrdering(@RequestBody @Valid List<OrderCreateDto> dto, @RequestHeader("X-User-Email") String email) {
 
-        Long id = orderingService.createOrdering(dto);
+        Long id = orderingService.createOrdering(dto, email);
 
         return new ResponseEntity<>(new CommonSuccessDto(id, HttpStatus.OK.value(), "주문 성공"), HttpStatus.CREATED);
     }

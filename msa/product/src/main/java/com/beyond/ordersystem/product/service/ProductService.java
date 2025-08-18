@@ -1,10 +1,7 @@
 package com.beyond.ordersystem.product.service;
 
 import com.beyond.ordersystem.product.domain.Product;
-import com.beyond.ordersystem.product.dto.ProductCreateDto;
-import com.beyond.ordersystem.product.dto.ProductResDto;
-import com.beyond.ordersystem.product.dto.ProductSearchDto;
-import com.beyond.ordersystem.product.dto.ProductUpdateDto;
+import com.beyond.ordersystem.product.dto.*;
 import com.beyond.ordersystem.product.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -142,6 +139,18 @@ public class ProductService {
             // Todo - 사용자가 이미지 없이 올렸을 때 삭제 로직(이미지 삭제만 하는 코드 넣어줘야 할 듯)
             product.setProductImgae(null);
         }
+
+        return product.getId();
+    }
+
+    // 상품 수량 감소
+    public Long updateStock(ProductUpdateStockDto dto) {
+        Product product = productRepository.findById(dto.getProductId()).orElseThrow(() -> new EntityNotFoundException("없는 상품입니다."));
+
+        if(product.getStockQuantity() < dto.getProductCount()) {
+            throw new IllegalArgumentException("재고 부족");
+        }
+        product.decreaseQuantity(dto.getProductCount());
 
         return product.getId();
     }

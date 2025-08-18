@@ -1,10 +1,7 @@
 package com.beyond.ordersystem.product.controller;
 
 import com.beyond.ordersystem.common.dto.CommonSuccessDto;
-import com.beyond.ordersystem.product.dto.ProductCreateDto;
-import com.beyond.ordersystem.product.dto.ProductResDto;
-import com.beyond.ordersystem.product.dto.ProductSearchDto;
-import com.beyond.ordersystem.product.dto.ProductUpdateDto;
+import com.beyond.ordersystem.product.dto.*;
 import com.beyond.ordersystem.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +47,13 @@ public class ProductController {
     public ResponseEntity<?> updateProduct(@PathVariable Long inputId, @ModelAttribute @Valid ProductUpdateDto dto) {
         Long id = productService.updateProduct(inputId, dto);
         return new ResponseEntity<>(new CommonSuccessDto(id, HttpStatus.OK.value(), "상품 수정 성공"), HttpStatus.OK);
+    }
+
+    // 상품 수량 감소
+    @PutMapping("/updatestock")
+    public ResponseEntity<?> updateStock(@RequestBody ProductUpdateStockDto dto) {
+        Long id = productService.updateStock(dto);
+        return new ResponseEntity<>(new CommonSuccessDto(id, HttpStatus.OK.value(), "상품 수량 변경 성공"), HttpStatus.OK);
     }
 
 
