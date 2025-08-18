@@ -1,7 +1,6 @@
 package com.beyond.ordersystem.product.controller;
 
 import com.beyond.ordersystem.common.dto.CommonSuccessDto;
-import com.beyond.ordersystem.product.domain.Product;
 import com.beyond.ordersystem.product.dto.ProductCreateDto;
 import com.beyond.ordersystem.product.dto.ProductResDto;
 import com.beyond.ordersystem.product.dto.ProductSearchDto;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,9 +26,8 @@ public class ProductController {
 
     // 상품 등록
     @PostMapping("/create")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> createProduct(@ModelAttribute @Valid ProductCreateDto dto) {
-        Long id = productService.createProduct(dto);
+    public ResponseEntity<?> createProduct(@ModelAttribute @Valid ProductCreateDto dto, @RequestHeader("X-User-Email") String email) {
+        Long id = productService.createProduct(dto, email);
         return new ResponseEntity<>(new CommonSuccessDto(id, HttpStatus.CREATED.value(), "상품등록 성공"), HttpStatus.CREATED);
     }
 

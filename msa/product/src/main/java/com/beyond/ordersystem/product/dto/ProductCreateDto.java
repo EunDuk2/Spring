@@ -1,6 +1,5 @@
 package com.beyond.ordersystem.product.dto;
 
-import com.beyond.ordersystem.member.domain.Member;
 import com.beyond.ordersystem.product.domain.Product;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -25,13 +24,13 @@ public class ProductCreateDto {
     private int stockQuantity;
     private MultipartFile productImage;
 
-    public Product toEntity(Member member) {
+    public Product toEntity(String email) {
         return Product.builder()
                 .name(this.name)
                 .category(this.category)
                 .price(this.price)
                 .stockQuantity(this.stockQuantity)
-                .member(member)
+                .memberEmail(email)
                 .build();
 
     }

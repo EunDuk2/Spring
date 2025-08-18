@@ -1,7 +1,5 @@
 package com.beyond.ordersystem.product.service;
 
-import com.beyond.ordersystem.member.domain.Member;
-import com.beyond.ordersystem.member.repository.MemberRepository;
 import com.beyond.ordersystem.product.domain.Product;
 import com.beyond.ordersystem.product.dto.ProductCreateDto;
 import com.beyond.ordersystem.product.dto.ProductResDto;
@@ -15,8 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,20 +30,15 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
-    private final MemberRepository memberRepository;
     private final S3Client s3Client;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
     // 상품 등록
-    public Long createProduct(ProductCreateDto dto) {
+    public Long createProduct(ProductCreateDto dto, String email) {
         if(productRepository.findByName(dto.getName()).isPresent()) throw new IllegalArgumentException("중복되는 이름입니다.");
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("없는 사용자입니다."));
-
-        Product product = productRepository.save(dto.toEntity(member));
+        Product product = productRepository.save(dto.toEntity(email));
 
         // 이미지 파일 s3에 올리고 url 가져오기
         MultipartFile profileImage = dto.getProductImage();

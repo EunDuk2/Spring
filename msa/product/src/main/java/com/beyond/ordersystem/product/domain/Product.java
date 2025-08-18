@@ -1,7 +1,6 @@
 package com.beyond.ordersystem.product.domain;
 
 import com.beyond.ordersystem.common.domain.BaseTimeEntity;
-import com.beyond.ordersystem.member.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,9 +23,9 @@ public class Product extends BaseTimeEntity {
     @Column(nullable = false)
     @Setter
     private int stockQuantity;
-    @JoinColumn(name = "member_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Member member;
+
+    private String memberEmail;
+
     @Setter
     private String productImgae;
 

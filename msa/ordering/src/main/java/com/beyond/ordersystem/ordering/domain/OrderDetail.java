@@ -1,7 +1,6 @@
 package com.beyond.ordersystem.ordering.domain;
 
 import com.beyond.ordersystem.common.domain.BaseTimeEntity;
-import com.beyond.ordersystem.product.domain.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,9 +18,11 @@ public class OrderDetail extends BaseTimeEntity {
     private Long id;
     @Column(nullable = false)
     private int quantity;
-    @JoinColumn(name = "product_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Product product;
+
+    private Long productId;
+    // 조회의 빈도에 따라 msa 도메인 설계에서 적절한 반정규화를 통한 성능 향상 가능
+    private String productName;
+
     @JoinColumn(name = "ordering_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Ordering ordering;

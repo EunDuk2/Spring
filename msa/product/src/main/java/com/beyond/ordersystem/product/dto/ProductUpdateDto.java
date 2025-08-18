@@ -1,7 +1,5 @@
 package com.beyond.ordersystem.product.dto;
 
-import com.beyond.ordersystem.member.domain.Member;
-import com.beyond.ordersystem.product.domain.Product;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

@@ -1,11 +1,9 @@
 package com.beyond.ordersystem.common.service;
 
 import com.beyond.ordersystem.common.dto.CommonErrorDto;
-import jakarta.persistence.MappedSuperclass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,12 +26,6 @@ public class CommonExceptionHandler {
         log.error(errorMessage);
         return new ResponseEntity<>(new CommonErrorDto(HttpStatus.BAD_REQUEST.value(), errorMessage), HttpStatus.BAD_REQUEST);
     }
-
-    @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<?> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
-        return new ResponseEntity<>(new CommonErrorDto(HttpStatus.FORBIDDEN.value(),  e.getMessage()), HttpStatus.FORBIDDEN);
-    }
-
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
