@@ -9,6 +9,7 @@ import com.beyond.ordersystem.ordering.dto.OrderCreateDto;
 import com.beyond.ordersystem.ordering.dto.OrderDetailDto;
 import com.beyond.ordersystem.ordering.dto.OrderListResDto;
 import com.beyond.ordersystem.ordering.dto.ProductDto;
+import com.beyond.ordersystem.ordering.feignclient.ProductFeignClient;
 import com.beyond.ordersystem.ordering.repository.OrderingDetailRepository;
 import com.beyond.ordersystem.ordering.repository.OrderingRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +30,7 @@ public class OrderingService {
     private final OrderingDetailRepository orderingDetailRepository;
     private final SseAlarmService sseAlarmService;
     private final RestTemplate restTemplate;
+    private final ProductFeignClient productFeignClient;
 
     // 주문 생성
     public Long createOrdering(List<OrderCreateDto> dtos, String email) {
@@ -73,6 +75,38 @@ public class OrderingService {
             // HttpEntity: http body와 http header를 세팅하기 위한
             HttpEntity<OrderCreateDto> updateStockEntity = new HttpEntity<>(dto, stockHeaders);
             restTemplate.exchange(productUpdateStockUrl, HttpMethod.PUT, updateStockEntity, Void.class);
+
+        }
+
+        sseAlarmService.publishMessage("admin@naver.com", email, ordering.getId());
+
+        return ordering.getId();
+    }
+
+    public Long createFeignKafka(List<OrderCreateDto> dtos, String email) {
+
+        Ordering ordering = Ordering.builder().orderStatus(OrderStatus.ORDERED).memberEmail(email).build();
+        orderingRepository.save(ordering);
+
+        // 재고 조회
+        for(OrderCreateDto dto : dtos) {
+            // feign 클라이언트를 사용한 상품 조회
+            CommonSuccessDto commonSuccessDto = productFeignClient.getProductById(dto.getProductId());
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            ProductDto product = objectMapper.convertValue(commonSuccessDto.getResult(), ProductDto.class);
+
+            int quantity = dto.getProductCount();
+            // 주문 발생
+            OrderDetail orderDetail = OrderDetail.builder().productId(product.getId()).productName(product.getName()).quantity(quantity).ordering(ordering).build();
+            ordering.getOrderDetailList().add(orderDetail);
+
+            // feign을 통한 동기적 재고감소 요청
+            productFeignClient.updateProductStockQuantity(dto);
+
+
+
+            // kafka를 활용한 비동기적 재고 감소
 
         }
 

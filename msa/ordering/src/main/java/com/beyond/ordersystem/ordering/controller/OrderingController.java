@@ -22,7 +22,7 @@ public class OrderingController {
     @PostMapping("/create")
     public ResponseEntity<?> createOrdering(@RequestBody @Valid List<OrderCreateDto> dto, @RequestHeader("X-User-Email") String email) {
 
-        Long id = orderingService.createOrdering(dto, email);
+        Long id = orderingService.createFeignKafka(dto, email);
 
         return new ResponseEntity<>(new CommonSuccessDto(id, HttpStatus.OK.value(), "주문 성공"), HttpStatus.CREATED);
     }

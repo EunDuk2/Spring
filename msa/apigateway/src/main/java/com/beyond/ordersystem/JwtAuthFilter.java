@@ -56,7 +56,6 @@ public class JwtAuthFilter implements GlobalFilter {
                 exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN); // 403
                 return exchange.getResponse().setComplete();
             }
-
             // header에 email, role, 등 payload값 세팅
             // X를 붙이는 것은 custom header라는 것을 의미하는 관례적 키워드
             // 추후 서비스 모듈에서 RequestHeader어노테이션을 사용하여 아래 헤더를 꺼내 쓸 수 있다.
