@@ -37,7 +37,9 @@ public class ProductController {
 
     // 상품상세 조회 (-> 캐싱처리 고려)
     @GetMapping("/detail/{inputId}")
-    public ResponseEntity<?> getProductDetail(@PathVariable Long inputId) {
+    public ResponseEntity<?> getProductDetail(@PathVariable Long inputId) throws InterruptedException {
+        // circuit test를 위한 지연
+//        Thread.sleep(3000L);
         ProductResDto productResDto = productService.getProductDetail(inputId);
         return new ResponseEntity<>(new CommonSuccessDto(productResDto, HttpStatus.OK.value(), "상품상세 조회 성공"), HttpStatus.OK);
     }

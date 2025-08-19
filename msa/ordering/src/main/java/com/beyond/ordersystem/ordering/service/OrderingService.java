@@ -13,6 +13,7 @@ import com.beyond.ordersystem.ordering.feignclient.ProductFeignClient;
 import com.beyond.ordersystem.ordering.repository.OrderingDetailRepository;
 import com.beyond.ordersystem.ordering.repository.OrderingRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -85,6 +86,13 @@ public class OrderingService {
         return ordering.getId();
     }
 
+    // Fall back 메서드는 원본 메서드의 매개변수와 정확히 일치해야함.
+    public void fallbackProductServiceCircuit(List<OrderCreateDto> dtos, String email, Throwable t) {
+        throw new RuntimeException("상품서버 응답 없음. 나중에 다시 시도해주세요." + t);
+    }
+
+    // 테스트 : 4-5번의 정상요청 -> 5번 중에 2번의 지연 발생 -> circuit open -> 그 다음 요청은 바로 fall back
+    @CircuitBreaker(name = "productServiceCircuit", fallbackMethod = "fallbackProductServiceCircuit")
     public Long createFeignKafka(List<OrderCreateDto> dtos, String email) {
 
         Ordering ordering = Ordering.builder().orderStatus(OrderStatus.ORDERED).memberEmail(email).build();

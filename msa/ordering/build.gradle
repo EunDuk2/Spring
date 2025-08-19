@@ -43,6 +43,9 @@ dependencies {
 
 	//    재고감소 비동기처리를 위한 kafka관련 의존성추가
 	implementation 'org.springframework.kafka:spring-kafka'
+
+	//    circuit 브레이커 도입시
+	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
 }
 
 dependencyManagement{
