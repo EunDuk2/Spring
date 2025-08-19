@@ -29,9 +29,17 @@ spring:
       # create : 매번 table을 drop후 재 생성
       # update : entity 변경사항만 alter를 적용하고 기존 데이터 유지
       # validate : 실제 DB와의 차이점을 check만 하고 ddl 문 실행 x, 콘솔로만 변경사항 출력.
-      ddl-auto: create
+      ddl-auto: update
     # 콘솔창에 ddl, dml 등의 쿼리를 출력하여 보여주는 옵션
     show_sql: true
+  kafka:
+    kafka-server: localhost:9092
+    consumer:
+      # group id는 컨슈머 그룹을 식별하는 id로서, 동일한 그룹 id를 가진 consumer들은 message를 분담해서 consume한다.
+      # 그런데, 만약 컨슈머가 서로 다른 group-id를 가지고 한 topic을 consume하면 message를 각기 수신하는 pub/sub 효과 발
+      group-id: product-group
+      # 가장 처음 들어온 메시지부터 읽기 시작(latest: 현시점 이후로 들어오는 메시지만 읽음)
+      auto-offset-reset: earliest
   servlet:
     multipart:
       # spring의 디폴트 사이즈 10MB

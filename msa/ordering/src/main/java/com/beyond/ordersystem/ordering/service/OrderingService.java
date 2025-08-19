@@ -15,6 +15,7 @@ import com.beyond.ordersystem.ordering.repository.OrderingRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -31,6 +32,7 @@ public class OrderingService {
     private final SseAlarmService sseAlarmService;
     private final RestTemplate restTemplate;
     private final ProductFeignClient productFeignClient;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     // 주문 생성
     public Long createOrdering(List<OrderCreateDto> dtos, String email) {
@@ -102,11 +104,12 @@ public class OrderingService {
             ordering.getOrderDetailList().add(orderDetail);
 
             // feign을 통한 동기적 재고감소 요청
-            productFeignClient.updateProductStockQuantity(dto);
-
+//            productFeignClient.updateProductStockQuantity(dto);
 
 
             // kafka를 활용한 비동기적 재고 감소
+            kafkaTemplate.send("stock-update-topic", dto);
+
 
         }
 
