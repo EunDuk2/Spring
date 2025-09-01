@@ -1,0 +1,25 @@
+# 별다른 설정없이도, 상황에 따라 컨테이너 내부에 경량화 리눅스가 설치된다.
+# 컨테이너 내에서 사용할 java 설치
+FROM openjdk:17-jdk-slim
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# localhost의 파일을 컨테이너 내의 /app폴더로 복사한다.
+COPY HelloWorld1.java /app
+
+# RUN : 이미지 빌드 과정
+# 컨테이너 내부에서 javac를 통해 class파일을 생성
+RUN javac HelloWorld1.java
+
+# CMD : 컨테이너 실행 시, 사용되는 명령어. 일반적으로 배열형식의 명령문 사용
+# 실행하는 시점에 아래 키워드로 실행함(이미지에 같이 포함)
+CMD ["java", "HelloWorld1"]
+
+
+# 도커이미지 생성
+# docker build -t 이미지명:태그명(버전) -f 도커파일위치 빌드컨텍스트위치
+# docker build -t hellojava1:v1.0 -f ./basic1/Dockerfile1 basic1/
+
+# 도커 컨테이너 실행
+# docker run 이미지명:버전명
