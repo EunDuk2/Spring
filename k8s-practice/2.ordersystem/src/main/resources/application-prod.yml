@@ -13,14 +13,15 @@ spring:
     activate:
       on-profile: prod
   redis:
-    host: localhost
+    host: redis-service
     port: 6379
   # 아래는 jdbc의 기본 db 관련 설정인데, jdbc 뿐만 아니라 mybatis / jpa 등 spring의 대부분의 DB 기술에 동일하게 사용
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/ordersystem
-    username: rootxxxxx
-    password: 1234yyyy
+    # 아래의 ${ } 부분은 pod를 실행하는 시점에 k8s의 secret자원을 활용
+    url: jdbc:mariadb://${DB_HOST}:3306/ordersystem
+    username: admin
+    password: ${DB_PW}
   jpa:
     database: mysql
     # innoDB를 쓰겠다 라는 설정
@@ -57,8 +58,8 @@ jwt:
   # 인코딩된 문자 32자 이상 필요. (특수문자 X)
   # beyondaccesstokensecretkeybeyondaccesstokensecretkeybeyondaccesstokensecretkey
 #  secretKeyAt: YmV5b25kYWNjZXNzdG9rZW5zZWNyZXRrZXliZXlvbmRhY2Nlc3N0b2tlbnNlY3JldGtleWJleW9uZGFjY2Vzc3Rva2Vuc2VjcmV0a2V5
-  secretKeyAt: xxxx
+  secretKeyAt: YmV5b25kYWNjZXNzdG9rZW5zZWNyZXRrZXliZXlvbmRhY2Nlc3N0b2tlbnNlY3JldGtleWJleW9uZGFjY2Vzc3Rva2Vuc2VjcmV0a2V5
   expirationRt: 10000 # 10000분
   # 원래 아래 시크릿키 달라야 됨
-  secretKeyRt: yyyy
+  secretKeyRt: YmV5b25kYWNjZXNzdG9rZW5zZWNyZXRrZXliZXlvbmRhY2Nlc3N0b2tlbnNlY3JldGtleWJleW9uZGFjY2Vzc3Rva2Vuc2VjcmV0a2V5
   

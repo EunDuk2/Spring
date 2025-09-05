@@ -11,7 +11,7 @@ server:
 spring:
   config:
     activate:
-      on-profile: prod
+      on-profile: local
   redis:
     host: localhost
     port: 6379
@@ -19,8 +19,8 @@ spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:3306/ordersystem
-    username: rootxxxxx
-    password: 1234yyyy
+    username: root
+    password: 1234
   jpa:
     database: mysql
     # innoDB를 쓰겠다 라는 설정
@@ -56,9 +56,7 @@ jwt:
   expirationAt: 1000 # 1000분
   # 인코딩된 문자 32자 이상 필요. (특수문자 X)
   # beyondaccesstokensecretkeybeyondaccesstokensecretkeybeyondaccesstokensecretkey
-#  secretKeyAt: YmV5b25kYWNjZXNzdG9rZW5zZWNyZXRrZXliZXlvbmRhY2Nlc3N0b2tlbnNlY3JldGtleWJleW9uZGFjY2Vzc3Rva2Vuc2VjcmV0a2V5
-  secretKeyAt: xxxx
+  secretKeyAt: YmV5b25kYWNjZXNzdG9rZW5zZWNyZXRrZXliZXlvbmRhY2Nlc3N0b2tlbnNlY3JldGtleWJleW9uZGFjY2Vzc3Rva2Vuc2VjcmV0a2V5
   expirationRt: 10000 # 10000분
   # 원래 아래 시크릿키 달라야 됨
-  secretKeyRt: yyyy
-  
+  secretKeyRt: YmV5b25kYWNjZXNzdG9rZW5zZWNyZXRrZXliZXlvbmRhY2Nlc3N0b2tlbnNlY3JldGtleWJleW9uZGFjY2Vzc3Rva2Vuc2VjcmV0a2V5
