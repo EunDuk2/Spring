@@ -188,4 +188,23 @@ public class ChatService {
         }
         return dtos;
     }
+
+    public void leaveGroupChatRoom(Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("room cannot found"));
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("member cannot found"));
+        if(chatRoom.getIsGroupChat().equals("N")) {
+            throw new IllegalArgumentException("단체 채팅방이 아닙니다.");
+        }
+        ChatParticipant c = chatParticipantRepository.findByChatRoomAndMember(chatRoom, member).orElseThrow(() -> new EntityNotFoundException("참여자 cannot found"));
+        chatParticipantRepository.delete(c);
+
+        // 참여자 아무도 없으면 채팅방까지 삭제 (Cascade로 줄줄이 삭제)
+        List<ChatParticipant> chatParticipants = chatRoom.getChatParticipants();
+        if(chatParticipants.isEmpty()){
+           chatRoomRepository.delete(chatRoom);
+        }
+
+
+    }
 }
