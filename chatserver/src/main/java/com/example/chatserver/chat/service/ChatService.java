@@ -1,14 +1,22 @@
 package com.example.chatserver.chat.service;
 
+import com.example.chatserver.chat.domain.ChatMessage;
 import com.example.chatserver.chat.domain.ChatParticipant;
+import com.example.chatserver.chat.domain.ChatRoom;
+import com.example.chatserver.chat.domain.ReadStatus;
+import com.example.chatserver.chat.dto.ChatMessageReqDto;
 import com.example.chatserver.chat.repository.ChatMessageRepository;
 import com.example.chatserver.chat.repository.ChatParticipantRepository;
 import com.example.chatserver.chat.repository.ChatRoomRepository;
 import com.example.chatserver.chat.repository.ReadStatusRepository;
+import com.example.chatserver.member.domain.Member;
 import com.example.chatserver.member.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -19,4 +27,33 @@ public class ChatService {
     private final MemberRepository memberRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final ReadStatusRepository readStatusRepository;
+
+    public void saveMessage(Long roomId, ChatMessageReqDto dto) {
+        // 채팅방 조회
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("room cannot found"));
+
+        // 보낸사람 조회
+        Member sender = memberRepository.findByEmail(dto.getSenderEmail()).orElseThrow(() -> new EntityNotFoundException("member cannot found"));
+
+        // 메시지 저장
+        ChatMessage chatMessage = ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .member(sender)
+                .content(dto.getMessage())
+                .build();
+        chatMessageRepository.save(chatMessage);
+
+        // 사용자별로 읽음 여부 저장
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+        for(ChatParticipant c : chatParticipants){
+            ReadStatus readStatus = ReadStatus.builder()
+                    .chatRoom(chatRoom)
+                    .member(c.getMember())
+                    .chatMessage(chatMessage)
+                    .isRead(c.getMember().equals(sender))
+                    .build();
+            readStatusRepository.save(readStatus);
+        }
+
+    }
 }
