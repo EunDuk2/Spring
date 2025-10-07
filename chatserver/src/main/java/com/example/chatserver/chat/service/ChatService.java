@@ -5,6 +5,7 @@ import com.example.chatserver.chat.domain.ChatParticipant;
 import com.example.chatserver.chat.domain.ChatRoom;
 import com.example.chatserver.chat.domain.ReadStatus;
 import com.example.chatserver.chat.dto.ChatMessageReqDto;
+import com.example.chatserver.chat.dto.ChatRoomListResDto;
 import com.example.chatserver.chat.repository.ChatMessageRepository;
 import com.example.chatserver.chat.repository.ChatParticipantRepository;
 import com.example.chatserver.chat.repository.ChatRoomRepository;
@@ -17,7 +18,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -76,4 +79,42 @@ public class ChatService {
                 .build();
         chatParticipantRepository.save(chatParticipant);
     }
+
+    public List<ChatRoomListResDto> getGroupChatRooms() {
+        List<ChatRoom> chatRooms = chatRoomRepository.findByIsGroupChat("Y");
+        List<ChatRoomListResDto> dtos = new ArrayList<>();
+        for(ChatRoom c : chatRooms){
+            ChatRoomListResDto dto = ChatRoomListResDto.builder()
+                    .roomId(c.getId())
+                    .roomName(c.getName())
+                    .build();
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+
+    public void addParticipantToGroupChat(Long roomId) {
+        // 채팅방 조회
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("room cannot found"));
+
+        // member 조회
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("member cannot found"));
+
+        // 이미 참여자인지 검증
+        Optional<ChatParticipant> participant = chatParticipantRepository.findByChatRoomAndMember(chatRoom, member);
+        if(!participant.isPresent()){
+            addParticipantToRoom(chatRoom,member);
+        }
+    }
+
+    // ChatParticipant객체 생성 후 저장
+    public void addParticipantToRoom(ChatRoom chatRoom, Member member) {
+        ChatParticipant chatParticipant = ChatParticipant.builder()
+                .chatRoom(chatRoom)
+                .member(member)
+                .build();
+        chatParticipantRepository.save(chatParticipant);
+    }
+
 }
