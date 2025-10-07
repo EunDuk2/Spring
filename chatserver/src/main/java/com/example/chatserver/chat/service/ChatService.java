@@ -4,7 +4,7 @@ import com.example.chatserver.chat.domain.ChatMessage;
 import com.example.chatserver.chat.domain.ChatParticipant;
 import com.example.chatserver.chat.domain.ChatRoom;
 import com.example.chatserver.chat.domain.ReadStatus;
-import com.example.chatserver.chat.dto.ChatMessageReqDto;
+import com.example.chatserver.chat.dto.ChatMessageDto;
 import com.example.chatserver.chat.dto.ChatRoomListResDto;
 import com.example.chatserver.chat.repository.ChatMessageRepository;
 import com.example.chatserver.chat.repository.ChatParticipantRepository;
@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.IllformedLocaleException;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ public class ChatService {
     private final ChatParticipantRepository chatParticipantRepository;
     private final ReadStatusRepository readStatusRepository;
 
-    public void saveMessage(Long roomId, ChatMessageReqDto dto) {
+    public void saveMessage(Long roomId, ChatMessageDto dto) {
         // 채팅방 조회
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("room cannot found"));
 
@@ -115,6 +116,47 @@ public class ChatService {
                 .member(member)
                 .build();
         chatParticipantRepository.save(chatParticipant);
+    }
+
+    public List<ChatMessageDto> getChatHistory(Long roomId) {
+        // 내가 해당 채팅방의 참여자가 아닐 경우 에러
+
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("room cannot found"));
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("member cannot found"));
+        List<ChatParticipant> chatParticipants = chatRoom.getChatParticipants();
+        boolean check = false;
+        for(ChatParticipant c : chatParticipants) {
+            if(c.getMember().equals(member)) {
+                check = true;
+            }
+        }
+        if(!check) throw new IllformedLocaleException("본인이 속하지 않은 채팅방입니다.");
+
+        // 특정 room에 대한 메시지 조회
+        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomOrderByCreatedTimeAsc(chatRoom);
+        List<ChatMessageDto> dtos = new ArrayList<>();
+        for(ChatMessage c : chatMessages){
+            ChatMessageDto dto = ChatMessageDto.builder()
+                    .message(c.getContent())
+                    .senderEmail(c.getMember().getEmail())
+                    .build();
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+
+    public boolean isRoomParticipant(String email, Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("room cannot found"));
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("member cannot found"));
+
+        List<ChatParticipant> chatParticipants = chatRoom.getChatParticipants();
+        for(ChatParticipant c : chatParticipants){
+            if(c.getMember().equals(member)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
