@@ -2,6 +2,9 @@ package com.example.chatserver.chat.controller;
 
 import com.example.chatserver.chat.dto.ChatMessageDto;
 import com.example.chatserver.chat.service.ChatService;
+import com.example.chatserver.chat.service.RedisPubSubService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Controller;
 public class StompController {
     private final SimpMessageSendingOperations messageTemplate;
     private final ChatService chatService;
+    private final RedisPubSubService redisPubSubService;
 
     // 방법1. MessageMapping(수신)과 SendTo(topic에 메시지 전달) 한꺼번에 처리
     // 아래 한 세트가 브로커 역할을 해준다. (메시지 받고, 전달까지)
@@ -27,14 +31,18 @@ public class StompController {
 
     // 방법2. MessageMapping 어노테이션만 활용
     @MessageMapping("/{roomId}")
-    public void sendMessage(@DestinationVariable Long roomId, ChatMessageDto dto) {
+    public void sendMessage(@DestinationVariable Long roomId, ChatMessageDto dto) throws JsonProcessingException {
         System.out.println(dto.getMessage());
 
         chatService.saveMessage(roomId, dto);
 
         // SendTo 대신 코드로
-        messageTemplate.convertAndSend("/topic/"+roomId, dto);
+//        messageTemplate.convertAndSend("/topic/"+roomId, dto);
 
+        dto.setRoomId(roomId);
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        String message = objectMapper.writeValueAsString(dto);
+        redisPubSubService.publish("chat", message);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.chatserver.common.configs;
 
+import com.example.chatserver.chat.service.RedisPubSubService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +9,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
@@ -27,8 +29,6 @@ public class RedisConfig {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
         configuration.setHostName(host);
         configuration.setPort(port);
-        configuration.setDatabase(0);
-
         return new LettuceConnectionFactory(configuration);
     }
 
@@ -42,6 +42,40 @@ public class RedisConfig {
         redisTemplate.setValueSerializer(new StringRedisSerializer());
         redisTemplate.setConnectionFactory(redisConnectionFactory); // Factory 객체 연결
         return redisTemplate;
+    }
+
+    @Bean
+    // 같은 Bean 객체가 있을 경우 Bean 객체를 구분하기 위한 어노테이션
+    @Qualifier("chatPubSub")
+    public RedisConnectionFactory chatPubSubFactory() {
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+        configuration.setHostName(host);
+        configuration.setPort(port);
+        return new LettuceConnectionFactory(configuration);
+    }
+
+    @Bean
+    @Qualifier("chatPubSub")
+    // Bean들끼리 서로 의존성을 주입받을 때, 메서드 파라미터로도 주입 가능
+    // 모든 Template 중에 무조건 redisTemplate 이라는 메서드 명이 반드시 1개는 있어야 함.
+    public StringRedisTemplate stringRedisTemplate(@Qualifier("chatPubSub") RedisConnectionFactory redisConnectionFactory) {
+        return new StringRedisTemplate(redisConnectionFactory);
+    }
+
+    // subscribe 객체
+    @Bean
+    public RedisMessageListenerContainer redisMessageListenerContainer(@Qualifier("chatPubSub") RedisConnectionFactory redisConnectionFactory, MessageListenerAdapter messageListenerAdapter) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(redisConnectionFactory);
+        container.addMessageListener(messageListenerAdapter, new PatternTopic("chat"));
+        return container;
+    }
+
+    // redis에서 수신된 메세지를 처리하는 객체 생성
+    @Bean
+    public MessageListenerAdapter messageListenerAdapter(RedisPubSubService redisPubSubService) {
+        // RedisPubSubService의 특정 메서드가 수신된 메시지를 처리할 수 있도록 지정
+        return new MessageListenerAdapter(redisPubSubService, "onMessage");
     }
 
 }
